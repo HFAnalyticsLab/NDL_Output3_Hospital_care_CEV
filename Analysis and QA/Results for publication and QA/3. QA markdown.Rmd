@@ -308,6 +308,28 @@ pooled.drop.april.by.age %>%
   kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
 ```
 
+### Pooled, excluding Grampian
+
+```{r apr.drop.by.age.pooled.ng, echo=FALSE, message=FALSE, warning=FALSE}
+pooled.ng.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
+                            year_month=="2020-04",partner!="Grampian",
+                            breakdown.level %in% c("admissions_emergency")) %>%
+  select(.,partner,strata,breakdown.level,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level,strata) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,strata,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.ng.drop.april.by.age %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
+```
+
 ### By partner
 
 
