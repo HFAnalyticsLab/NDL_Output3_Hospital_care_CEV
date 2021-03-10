@@ -49,8 +49,8 @@ These scripts were written in R version 4.0.2 and RStudio Version 1.1.383.
 
 ## Authors
 
-* Sebastien Peytrignet, The Health Foundation - [Twitter](https://twitter.com/SebastienPeytr2) - [GitHub](https://github.com/sg-peytrignet)
 * Karen Hodgson, The Health Foundation - [Twitter](https://twitter.com/KarenHodgePodge) - [GitHub](https://github.com/KarenHodgson)
+* Sebastien Peytrignet, The Health Foundation - [Twitter](https://twitter.com/SebastienPeytr2) - [GitHub](https://github.com/sg-peytrignet)
 * Jessica Butler, Aberdeen Centre for Health Data Science (ACHDS) - [Twitter](https://twitter.com/jessbutler284)
 * Alisha Davies, Public Health Wales - [Twitter](https://twitter.com/AlishaDavies1)
 * Sara Sekelj, Imperial College Health Partners
