@@ -1,6 +1,6 @@
 <img src="ndlbanner.png" width="405" height="96">
 
-# Networked Data Lab: Morbidity and long-term conditions among those advised to shield from COVID-19
+# Networked Data Lab: Hospital care for the clinically extremely vulnerable before and during COVID-19
 
 #### Project Status: In progess
 
@@ -10,10 +10,9 @@
 
 - We are using a federated approach to data analysis and each partner will be contributing the same descriptive analysis based on their local population. These results will then be analysed and aggregated where necessary.
 
-- We will identify long-term conditions by looking back at hospital admission health care records in the period between 1 March 2018 and 29 February 2020. The long-term conditions identified for this analysis are the conditions which comprise the Elixhauser Comorbidity Index. In some cases, there may be overlap with the conditions on the
-shielded patient list.
+- Our full [statistical analysis plan](https://www.health.org.uk/sites/default/files/2020-12/ndl_statistical_analysis_plan_-_descriptive_analysis_of_cev_people_during_covid-19_0.pdf) for this project is available on our website.
 
-- We will aim to identify each of the following conditions by identifying inpatient records that match the relevant ICD-10 cides. In short, an individual is assumed to have had the condition if any record exists during this period matching the relevant ICD-10 codes corresponding to this condition (regardless of whether this was the primary diagnosis). A coding algorithm is set out by [Quan et al (2005)](https://pubmed.ncbi.nlm.nih.gov/21764557/).
+- This output describes the changes in secondary health care use for CEV people during the period of shielding between March and July 2020. We also examine the direct impacts of COVID-19 on this group across each local area. These findings are useful in building an understanding of the impacts from both a patient and a service perspective.
 
 ## Partners
 
