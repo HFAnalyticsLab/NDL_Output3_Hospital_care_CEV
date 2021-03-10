@@ -1,0 +1,545 @@
+
+# Libraries
+```{r, message = F}
+library(tidyverse)
+
+.libPaths(
+  c('H:/DaSH416/R_libraries/R_Transfer_25062020',
+    'H:/DaSH416/R_libraries/R_Libraries_15072020',
+    'H:/DaSH416/R_libraries/R_Transfer_06012021'))
+
+library(here)
+library(vroom)
+library(lubridate)
+library(janitor)
+
+options(scipen = 999)
+```
+
+# Shielding list data
+```{r message = F}
+#tidy and combine "pregnant" with "other" group
+
+shielding_long <-
+  vroom(here("original_data", 'Dash416_Shield20201012_Release.csv'),
+        delim = "¬") %>%
+  clean_names() %>%
+  rename(id = dash416_release_uid) %>%
+  mutate(date_addition = as_date(ymd_hms(earliest_addition_this_chi)),
+         date_death = as_date(ymd(trak_person_deceased_date))) %>%
+  select(id,
+         group,
+         origin_for_this_group,
+         date_addition,
+         removal_description,
+         date_death) %>%
+  mutate(group = ifelse(group == 6, 7, group)) %>%
+  distinct()
+
+#add translation of shielding group codes
+shielding_long <-
+  vroom(here("original_data", "shielding_codes_short.csv"),
+        delim = ",") %>%
+  left_join(shielding_long, ., by = c("group" = "shielding_group"))
+
+#demographic data
+demog <-
+  vroom(here("original_data", 'Dash416_Shield20201012_Demographic_Release.csv'),
+        delim = "¬") %>%
+  rename(id = Dash416_Release_UID) %>%
+  clean_names() %>%
+  select(id, calc_sex, calc_dob) 
+
+#small area statistics about home 
+vulnerability <-
+  vroom(here("original_data", 'Dash416_Shield20201012_vulnerability_Release.csv'),
+        delim = "¬") %>%
+  clean_names() %>%
+  rename(id = dash416_release_uid,
+         ur_name = u_rname) %>%
+  mutate(simd_quintile = as_factor(simd2020v2_quintile)) %>%
+  select(id, simd_quintile, ur_name)
+```
+
+
+# Population exclusions
+```{r}
+#anyone not on shielding list before 1 Aug
+#anyone who died before 28 March
+#false positives
+#moved from Scotland
+shielding_long <-
+  shielding_long %>%
+  filter(date_addition <= ymd("2020-07-31")) %>%
+  filter(date_death > ymd("2020-03-28") |
+           is.na(date_death)) %>%
+  filter(
+    !removal_description %in%
+      c("FalsePosLungCancer", "False Positive", "Moved out of Scotland")) 
+
+unique_ids <- unique(shielding_long$id)
+n_shielders = length(unique_ids)
+```
+
+
+# Tidy demographic data
+```{r}
+#keep only people in NDL cohort
+demog <- 
+  demog %>%
+    filter(id %in% unique_ids)
+
+#create variables for sex and age band
+demog <- demog %>%
+  mutate(
+    sex = if_else(calc_sex == 1, "F", "M"),
+    dob = ymd(calc_dob),
+    age = as.period(interval(dob, ymd("2020-03-01")), units = "years")$year,
+    age_band = 
+      case_when(
+        age %in% c(0:29) ~ "0-29",
+        age %in% c(30:49) ~"30-49",
+        age %in% c(50:69) ~"50-69",
+        age %in% c(70:120) ~"70+")) %>%
+  select(-calc_sex, -calc_dob)
+
+#create age band variable
+demog$age_band <- factor(demog$age_band, levels = c("0-29", "30-49", "50-69", "70+"))
+
+#add details of shielding reasons to demographics
+demog <- 
+  demog %>%
+  left_join(., vulnerability, by = "id")
+
+#add deaths to demog
+demog <-
+  shielding_long %>%
+  select(id, date_death) %>%
+  unique() %>%
+  left_join(demog, ., by = "id") 
+
+#add death month field
+#NB exclude deaths after July for NDL
+demog <-
+  demog %>%
+  mutate(month_death = floor_date(date_death, "month"),
+         month_death_ndl = 
+           as_date(ifelse(
+             month_death > ymd("2020-07-31"), NA, month_death)))
+
+
+#add some demographics values to long shielding list
+shielding_long <-
+  demog %>%
+    select(id, age, age_band, sex, simd_quintile, ur_name) %>%
+  left_join(shielding_long, ., by = "id") 
+
+rm(vulnerability)
+
+#count thow many have SIMD data
+n_simd = nrow(filter(demog, !is.na(simd_quintile)))
+```
+
+#Load and tidy A&E data
+```{r}
+ae <-
+  vroom(here("original_data", 'Dash416_HI_ED_Attendances_Release_v1.csv'),
+        delim = "¬") %>%
+  clean_names() %>%
+  rename(id = dash416_release_uid,
+         date = arrival_date) %>%
+  select(id, date)
+
+#filter for NDL date range and cohort
+#add month variable
+ae <- 
+  filter(ae, 
+         date >= ymd("2018-03-01"),
+         date <= ymd("2020-07-31"),
+         id %in% unique_ids) %>%
+  mutate(date_month = as_date(floor_date(date, "month")))
+
+#add demog data to A&E
+ae <-
+  ae %>%
+  left_join(., demog, by = "id")
+```
+
+#A&E attendances tables
+```{r}
+ae %>%
+  group_by(date_month, .drop = F) %>%
+  summarise(ae_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "ae_attendances_total.csv")
+
+ae %>%
+  group_by(date_month, age_band, .drop = F) %>%
+  summarise(ae_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "ae_attendances_by_age.csv")
+
+ae %>%
+  group_by(date_month, sex, .drop = F) %>%
+  summarise(ae_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "ae_attendances_by_sex.csv")
+
+#remove NAs due to small numbers
+ae %>%
+  filter(!is.na(simd_quintile)) %>%
+  group_by(date_month, simd_quintile, .drop = F) %>%
+  summarise(ae_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_simd) %>%
+  write_csv(., "ae_attendances_by_deprivation.csv")
+```
+
+#Load and tidy outpatient attendances
+```{r}
+smr00 <-
+  vroom(here("original_data", 'Dash416_Shield20201012_SMR00_Release.csv'),
+        delim = ",") %>%
+  clean_names() %>%
+  rename(id = dash416_release_uid,
+         date_clinic = clinic_date) %>%
+  mutate(date_clinic = as_date(date_clinic)) %>%
+  select(id, date_clinic, clinic_attendance, specialty)
+
+#select date range, attenders, and those in NDL population
+smr00 <- 
+  filter(smr00, 
+         date_clinic >= ymd("2018-03-01"),
+         date_clinic <= ymd("2020-07-31"),
+         id %in% unique_ids,
+         clinic_attendance == 1) %>%
+  select(-clinic_attendance) %>%
+  mutate(date_month = floor_date(date_clinic, "month"))
+
+#add demog data to hospital admissions
+smr00 <-
+  smr00 %>%
+  left_join(., demog, by = "id") 
+```
+
+#Outpatient attendances tables
+```{r}
+smr00 %>%
+  group_by(date_month, .drop = F) %>%
+  summarise(outpatient_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "outpatient_attendances_total.csv")
+
+smr00 %>%
+  group_by(date_month, age_band, .drop = F) %>%
+  summarise(outpatient_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "outpatient_attendances_by_age.csv")
+
+smr00 %>%
+  group_by(date_month, sex, .drop = F) %>%
+  summarise(outpatient_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "outpatient_attendances_by_sex.csv")
+
+#remove NAs due to small numbers
+smr00 %>%
+  filter(!is.na(simd_quintile)) %>%
+  group_by(date_month, simd_quintile, .drop = F) %>%
+  summarise(outpatient_attendances = n(),
+            people_attending = n_distinct(id),
+            cohort_size = n_simd) %>%
+  write_csv(., "outpatient_attendances_by_deprivation.csv")
+```
+
+
+# Load and tidy hospital admissions
+```{r}
+#load data, rename variables, format dates, add episode ID and date month, select only variables needed
+
+smr01_long <-
+  vroom(here("original_data", 'Dash416_Shield20201012_SMR01_Release.csv'),
+        delim = "¬") %>%
+  clean_names() %>%
+  rename(id = dash416_release_uid,
+         main_condition = main_cod,
+         other_condition1 = oc1,
+         other_condition2 = oc2,
+         other_condition3 = oc3,
+         other_condition4 = oc4,
+         other_condition5 = oc5) %>%
+  mutate(
+    date_episode_start = as_date(ymd(date_episode_start)),
+    date_episode_end = as_date(ymd(date_episode_end)),
+    date_admission = as_date(ymd(adm_date)),
+    date_discharge = as_date(ymd(date_discharge)),
+    episode_id = paste(id, date_episode_start, sep = "_"),
+    date_month = floor_date(date_episode_start, unit = "month")) %>%
+  select(
+    id,
+    episode_id,
+    date_month,
+    date_episode_start,
+    date_admission,
+    date_discharge,
+    date_episode_end,
+    admission_type,
+    loc_discharge,
+    main_condition,
+    other_condition1,
+    other_condition2,
+    other_condition3,
+    other_condition4,
+    other_condition5)
+
+#summarise urgency of admission (for each spell)
+smr01_long <-
+  smr01_long %>%
+  mutate(
+    admission_type_ndl =
+      case_when(admission_type %in% c(10:19) ~ "routine",
+                admission_type %in% c(30:39) ~ "emergency",
+                admission_type %in% c(20:29) ~ "emergency"))
+
+#select date range and those in NDL population
+smr01_long <- 
+  filter(smr01_long, 
+         date_episode_start >= ymd("2018-03-01"),
+         date_episode_start <= ymd("2020-07-31"),
+         id %in% unique_ids)
+```
+
+
+# Combine hospital spells
+```{r}
+#if any spell was an emergency, and emergency admission, else routine
+smr01 <-
+  smr01_long %>%
+  group_by(episode_id) %>%
+  arrange(admission_type_ndl) %>%
+  summarise(admission_types = paste(admission_type_ndl, collapse = ", ")) %>%
+  mutate(admission_type = 
+           ifelse(str_detect(admission_types, "emergency"),
+                  "emergency", "routine")) %>%
+  select(-admission_types)
+
+smr01 <-
+  smr01_long %>%
+  group_by(episode_id) %>%
+  arrange(date_episode_start) %>%
+  slice_head() %>%
+  select(id,
+         episode_id,
+         date_month,
+         date_episode_start,
+         date_episode_end) %>%
+  left_join(smr01, by = "episode_id")
+
+#add demog data to hospital admissions
+smr01 <-
+  smr01 %>%
+  left_join(., demog, by = "id") 
+```
+
+
+#Find Covid ICD10 in any diagnosis
+```{r}
+#make the 5 diagnostic codes per spell into long format
+smr01_diagnoses <-
+  smr01_long %>%
+  pivot_longer(main_condition:other_condition5, values_drop_na = T) %>%
+  select(id, episode_id, date_episode_start, name, value)
+
+#pull ids of episodes with either of the 2 Covid ICD10s
+covid_episodes <-
+  smr01_diagnoses %>%
+  filter(str_detect(value, "U071") | str_detect(value, "U072")) %>%
+  distinct(episode_id) %>%
+  pull(episode_id)
+
+#add flag if episode contains Covid ICD10
+smr01 <-
+  smr01 %>%
+  mutate(covid_episode = ifelse(episode_id %in% covid_episodes, 1, 0))
+
+rm(smr01_diagnoses, covid_episodes)
+```
+
+#Find Covid diagnosis in main or other ICD10 code of first spell of episode only
+```{r}
+#slice off first spell of episode
+#make all five ICD10 code fields long
+smr01_first_diagnoses <-
+  smr01_long %>%
+  group_by(episode_id) %>%
+  arrange(date_admission) %>%
+  slice_head() %>%
+  pivot_longer(main_condition:other_condition5, values_drop_na = T) %>%
+  select(id, episode_id, date_episode_start, name, value)
+
+#pull ids of episodes with either of the 2 Covid ICD10s
+covid_first_episodes <-
+  smr01_first_diagnoses %>%
+  filter(str_detect(value, "U071") | str_detect(value, "U072")) %>%
+  distinct(episode_id) %>%
+  pull(episode_id)
+
+#add flag if episode contains Covid ICD10
+smr01 <-
+  smr01 %>%
+  mutate(covid_first_episode = ifelse(episode_id %in% covid_first_episodes, 1, 0)) %>%
+  ungroup()
+
+rm(smr01_first_diagnoses, covid_first_episodes)
+```
+
+#Covid ICD10s table
+```{r}
+#table for any diagnosis
+#filter pre-March Covid ICD10s as error
+covid_any <-
+  smr01 %>%
+  filter(date_episode_start > ymd("2020-03-01")) %>%
+  filter(covid_episode == 1) %>%
+  group_by(date_month) %>%
+  summarise(people_with_any_covid_diagnosis = n_distinct(id))
+
+#table for first spell diagnosis
+#filter pre-March Covid ICD10s as error
+covid_first <-
+  smr01 %>%
+  filter(date_episode_start > ymd("2020-03-01")) %>%
+  filter(covid_first_episode == 1) %>%
+  group_by(date_month) %>%
+  summarise(people_with_covid_diagnosis_first_spell = n_distinct(id),
+            cohort_size = n_shielders)
+
+full_join(covid_any, covid_first, by = "date_month") %>%
+  write_csv(., "covid_diagnoses.csv")
+
+rm(covid_any, covid_first)
+```
+
+
+#Hospital admissions tables
+```{r}
+smr01 %>%
+  group_by(date_month, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "hospital_admissions_total.csv")
+
+smr01 %>%
+  group_by(date_month, age_band, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "hospital_admissions_by_age.csv")
+
+smr01 %>%
+  group_by(date_month, sex, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "hospital_admissions_by_sex.csv")
+
+#remove na small numbers
+smr01 %>%
+  filter(!is.na(simd_quintile)) %>%
+  group_by(date_month, simd_quintile, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_simd) %>%
+  write_csv(., "hospital_admissions_by_deprivation.csv")
+
+smr01 %>%
+  group_by(date_month, admission_type, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "hospital_admissions_by_type.csv")
+
+smr01 %>%
+  group_by(date_month, admission_type, age_band, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "hospital_admissions_by_type_by_age.csv") 
+
+smr01 %>%
+  group_by(date_month, admission_type, sex, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_shielders) %>%
+  write_csv(., "hospital_admissions_by_type_by_sex.csv") 
+
+#remove NAs due to small numbers
+smr01 %>%
+  filter(!is.na(simd_quintile)) %>%
+  group_by(date_month, admission_type, simd_quintile, .drop = F) %>%
+  summarise(hospital_admissions = n(),
+            people_admitted = n_distinct(id),
+            cohort_size = n_simd) %>%
+  write_csv(., "hospital_admissions_by_type_by_deprivation.csv") 
+```
+
+#Deaths in Hospital
+```{r}
+deaths_in_hospital <-
+  vroom(here("original_data", "Dash416_Shield20201012_Hospital_Deaths_Release_v1.txt"), delim = "¬") %>%
+  clean_names() %>%
+  rename(id = dash416_release_uid) %>%
+  mutate(smr_dod_discharge_date = as_date(smr_dod_discharge_date)) %>%
+  filter(smr_dod_discharge_date >= ymd("2020-03-28")) %>%
+  filter(smr_dod_discharge_date <= ymd("2020-07-31")) %>%
+  pull(id)
+
+demog <-
+  demog %>%
+  mutate(died_in_hospital =
+           ifelse(id %in% deaths_in_hospital, 1, 0))
+```
+
+#Death tables
+```{r}
+#exclude those without death date
+
+demog %>%
+  filter(!is.na(month_death_ndl)) %>%
+  group_by(month_death_ndl, .drop = F) %>%
+  summarise(n_deaths = n(),
+            died_in_hospital = sum(died_in_hospital == 1),
+            cohort_size = n_shielders) %>%
+  write_csv(., "deaths_total.csv")
+
+demog %>%
+  filter(!is.na(month_death_ndl)) %>%
+  group_by(month_death_ndl, age_band, .drop = F) %>%
+  summarise(n_deaths = n(),
+            died_in_hospital = sum(died_in_hospital == 1)) %>%
+  write_csv(., "deaths_by_age.csv")
+
+demog %>%
+  filter(!is.na(month_death_ndl)) %>%
+  group_by(month_death_ndl, sex, .drop = F) %>%
+  summarise(n_deaths = n(),
+            died_in_hospital = sum(died_in_hospital == 1)) %>%
+  write_csv(., "deaths_by_sex.csv")
+
+#NB removed na small numbers
+demog %>%
+  filter(!is.na(month_death_ndl)) %>%
+  filter(!is.na(simd_quintile)) %>%
+  group_by(month_death_ndl, simd_quintile, .drop = F) %>%
+  summarise(n_deaths = n(),
+            died_in_hospital = sum(died_in_hospital == 1)) %>% 
+  write_csv(., "deaths_by_deprivation.csv")
+```
+
