@@ -12,7 +12,6 @@
 #R Project
 *.Rproj
 *.DS_Store
-*.html
 
 # Ada Library Information
 *.ali
