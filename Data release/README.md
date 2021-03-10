@@ -5,3 +5,5 @@ The Open Data release resulting from this Networked Data Lab analysis, including
 - Healthcare use
 - COVID admissions
 - All-cause deaths
+
+The data release may be downloaded from [here](https://github.com/HFAnalyticsLab/NDL_Output3_Hospital_care_CEV/blob/main/Data%20release/Networked-Data-Lab-Characteristics-of-CEV-people-GitHub.xlsx) (Excel workbook / xlsx).
