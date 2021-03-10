@@ -23,16 +23,21 @@ pacman::p_load(dplyr,stringr,sp,ggplot2,plyr,readODS,
 rm(list = ls())
 
 #Directories
-gitdir <- rstudioapi::getSourceEditorContext()$path %>%
-  dirname(.) %>%
-  dirname(.)
+# gitdir <- rstudioapi::getSourceEditorContext()$path %>%
+#   dirname(.) %>%
+#   dirname(.)
+#setwd(gitdir)
+
 rawdatadir <- "M:/Analytics/Networked Data Lab/Partner outputs/Output 3 HC usage/"
-setwd(gitdir)
+gitdir <- "M:/Analytics/Sebastien/GitHub/NDL_Output3_Hospital_care_CEV/"
 
 #Aux data
 bl.orders <- data.frame(order=1:4,breakdown.level=c("outpatient_attendance","AE_attendance","admissions_electives","admissions_emergency"))
 month.lookup <- data.frame(month.number=c("01","02","03","04","05","06","07","08","09","10","11","12"),
                            month.abbr=month.abb)
+
+#Files directory
+setwd(gitdir)
 
 #Load partner data
 table1.all.partners <- fread("Visualize data/Data/table1.all.partners.csv",
@@ -170,7 +175,7 @@ drop.april <- filter(table1.all.partners.pcts,strata=="overall",
                                                    "outpatient_attendance",
                                                    "AE_attendance")) %>%
   select(.,breakdown.level,partner,year_month,
-         number.events.sdc_l1,number.events.sdc,
+         number.events.sdc_l1,number.events.sdc,abs_change_12m) %>%
   group_by(breakdown.level,partner) %>%
   summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
             abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
@@ -269,7 +274,7 @@ total.patients <- filter(table1.all.partners,strata=="overall",
   select(.,total.patients) %>%
   sum(.)
 
-table.abs.changes$total.patients <- total.patients
+table.abs.changes$total_patients <- total.patients
 
 table.abs.changes %>%
   kable(.,digits=1,format.args = list(big.mark = ",")) %>%
