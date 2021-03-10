@@ -138,7 +138,7 @@ jan20_table %>%
   kable_styling(bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
 ```
 
-## % reductions in April 2020 vs. April 2019
+## % reduction in activity in April 2020 vs. April 2019
 
 ### Pooled
 
@@ -280,6 +280,61 @@ table.abs.changes %>%
   kable(.,digits=1,format.args = list(big.mark = ",")) %>%
   kable_styling(., full_width = F)
 ```
+
+## % reduction in activity in April 2020 vs. April 2019, by age group and type of healthcare
+
+### Pooled
+
+```{r apr.drop.by.age.pooled, echo=FALSE, message=FALSE, warning=FALSE}
+pooled.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
+                            year_month=="2020-04",
+                            breakdown.level %in% c("admissions_electives",
+                                                   "outpatient_attendance",
+                                                   "admissions_emergency",
+                                                   "AE_attendance")) %>%
+  select(.,partner,strata,breakdown.level,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level,strata) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,strata,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.drop.april.by.age %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
+```
+
+### By partner
+
+
+```{r apr.drop.by.age, echo=FALSE, message=FALSE, warning=FALSE}
+drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
+                            year_month=="2020-04",
+                            breakdown.level %in% c("admissions_electives",
+                                                   "outpatient_attendance",
+                                                   "admissions_emergency",
+                                                   "AE_attendance")) %>%
+  select(.,partner,strata,breakdown.level,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(partner,breakdown.level,strata) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,strata,partner,abs_change_12m,pct_change) %>%
+  arrange(.,breakdown.level,strata,desc(pct_change),) %>%
+  clean_colnames(.)
+
+drop.april.by.age %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
+```
+
 
 ## Change in absolute numbers by age group (March to July 2020, compared to same period in 2019)
 
