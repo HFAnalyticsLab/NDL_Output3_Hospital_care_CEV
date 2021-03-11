@@ -138,16 +138,15 @@ clean_colnames <- function(dataset){
 <!--   kable_styling(bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8) -->
 <!-- ``` -->
 
-## % reduction in activity in April 2020 vs. April 2019
+## % reduction in activity in April 2020 vs. April 2019 (A&E and outpatient)
 
-### Pooled (excl. Leeds)
+### Pooled (all 5 partners)
 
 ```{r apr.pct.change.pooled, echo=FALSE, message=FALSE, warning=FALSE}
 
 pooled.drop.april <- filter(table1.all.partners.pcts,strata=="overall",
-                            year_month=="2020-04",partner!="Leeds",
-                            breakdown.level %in% c("admissions_electives",
-                                                   "outpatient_attendance",
+                            year_month=="2020-04",
+                            breakdown.level %in% c("outpatient_attendance",
                                                    "AE_attendance")) %>%
   select(.,breakdown.level,partner,year_month,
          number.events.sdc_l1,number.events.sdc,
@@ -171,8 +170,7 @@ pooled.drop.april %>%
 
 drop.april <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",
-                            breakdown.level %in% c("admissions_electives",
-                                                   "outpatient_attendance",
+                            breakdown.level %in% c("outpatient_attendance",
                                                    "AE_attendance")) %>%
   select(.,breakdown.level,partner,year_month,
          number.events.sdc_l1,number.events.sdc,abs_change_12m) %>%
@@ -190,11 +188,59 @@ drop.april %>%
   kable_styling(., full_width = F, font_size= 8)
 ```
 
-## Emergency admissions: % reductions in April 2020 vs. April 2019
+## % reduction in activity in April 2020 vs. April 2019 (elective admissions)
 
-### Pooled (except Grampian and Leeds)
+### Pooled (excl. Leeds)
 
-```{r ng.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r elective.apr.pct.change.pooled, echo=FALSE, message=FALSE, warning=FALSE}
+
+pooled.drop.april <- filter(table1.all.partners.pcts,strata=="overall",
+                            year_month=="2020-04",partner!="Leeds",
+                            breakdown.level %in% c("admissions_electives")) %>%
+  select(.,breakdown.level,partner,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.drop.april %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+```
+
+### By partner
+
+```{r elective.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+
+drop.april.bis <- filter(table1.all.partners.pcts,strata=="overall",
+                            year_month=="2020-04",
+                            breakdown.level %in% c("admissions_electives")) %>%
+  select(.,breakdown.level,partner,year_month,
+         number.events.sdc_l1,number.events.sdc,abs_change_12m) %>%
+  group_by(breakdown.level,partner) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,partner,abs_change_12m,pct_change) %>%
+  arrange(.,breakdown.level,desc(pct_change)) %>%
+  clean_colnames(.)
+
+drop.april.bis %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F, font_size= 8)
+```
+
+##  % reduction in activity in April 2020 vs. April 2019 (emergency admissions)
+
+### Pooled (excl. Grampian and Leeds)
+
+```{r emergency.pooled.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
 
 drop.april.pooled.ng <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",partner!="Grampian",partner!="Leeds",
@@ -218,7 +264,7 @@ drop.april.pooled.ng %>%
 
 ### By partner
 
-```{r emadm.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r emergency.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
 
 drop.april.ae <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",
@@ -255,7 +301,7 @@ pct_change <- round((after-before)/before*100,1)
 pct_change
 ```
 
-## Change in absolute numbers March-July (2020 compared to 2019, excluding Leeds)
+## Change in absolute numbers March-July (2020 compared to 2019, excl. Leeds)
 
 ```{r march.july.change, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -283,15 +329,14 @@ table.abs.changes %>%
 
 ## % reduction in activity in April 2020 vs. April 2019, by age group and type of healthcare
 
-### Pooled (excl. Leeds)
+### Pooled
 
 ```{r apr.drop.by.age.pooled, echo=FALSE, message=FALSE, warning=FALSE}
 pooled.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
-                            year_month=="2020-04",partner!="Leeds",
-                            breakdown.level %in% c("admissions_electives",
-                                                   "outpatient_attendance",
-                                                   "admissions_emergency",
-                                                   "AE_attendance")) %>%
+                            year_month=="2020-04",
+                            breakdown.level %in% c("outpatient_attendance",
+                                                   "AE_attendance"),
+                            strata %in% c("0-29","70+")) %>%
   select(.,partner,strata,breakdown.level,year_month,
          number.events.sdc_l1,number.events.sdc,
          abs_change_12m) %>%
@@ -308,12 +353,13 @@ pooled.drop.april.by.age %>%
   kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
 ```
 
-### Pooled (excl. Grampian and Leeds)
+### Pooled (excl. Leeds)
 
 ```{r apr.drop.by.age.pooled.ng, echo=FALSE, message=FALSE, warning=FALSE}
-pooled.ng.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
-                            year_month=="2020-04",partner!="Grampian",partner!="Leeds",
-                            breakdown.level %in% c("admissions_emergency")) %>%
+pooled.nl.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
+                            year_month=="2020-04",partner!="Leeds",
+                            breakdown.level %in% c("admissions_electives","admissions_emergency"),
+                            strata %in% c("0-29","70+")) %>%
   select(.,partner,strata,breakdown.level,year_month,
          number.events.sdc_l1,number.events.sdc,
          abs_change_12m) %>%
@@ -325,7 +371,30 @@ pooled.ng.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
   select(.,breakdown.level,strata,abs_change_12m,pct_change) %>%
   clean_colnames(.)
 
-pooled.ng.drop.april.by.age %>%
+pooled.nl.drop.april.by.age %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
+```
+
+### Pooled (excl. Grampian and Leeds)
+
+```{r apr.drop.by.age.pooled.ngnl, echo=FALSE, message=FALSE, warning=FALSE}
+pooled.ngnl.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
+                            year_month=="2020-04",partner!="Grampian",partner!="Leeds",
+                            breakdown.level %in% c("admissions_emergency"),
+                            strata %in% c("0-29","70+")) %>%
+  select(.,partner,strata,breakdown.level,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level,strata) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,strata,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.ngnl.drop.april.by.age %>%
   kable(.,digits=1,format.args = list(big.mark = ",")) %>%
   kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
 ```
@@ -338,7 +407,8 @@ drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
                             breakdown.level %in% c("admissions_electives",
                                                    "outpatient_attendance",
                                                    "admissions_emergency",
-                                                   "AE_attendance")) %>%
+                                                   "AE_attendance"),
+                            strata %in% c("0-29","70+")) %>%
   select(.,partner,strata,breakdown.level,year_month,
          number.events.sdc_l1,number.events.sdc,
          abs_change_12m) %>%
@@ -357,12 +427,13 @@ drop.april.by.age %>%
 ```
 
 
-## Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excluding Leeds
+## Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excl. Leeds
 
 ```{r march.july.age.change, echo=FALSE, message=FALSE, warning=FALSE}
 
 absolute_reduction_over_70 <- filter(table1.all.partners.pcts,breakdown=="age",
                                      breakdown.level %in% c("outpatient_attendance","admissions_electives"),
+                                     strata %in% c("0-29","70+"),
                                      year_month>="2020-03",
                                      partner!="Leeds") %>%
   select(.,breakdown.level,partner,year_month,strata,total.patients,abs_change_12m) %>%
