@@ -334,7 +334,7 @@ code span.ot { color: #007020; }
 <div class="inner">
 <ul>
 <li><a href="#reduction-in-activity-in-april-2020-vs.-april-2019-ae-and-outpatient">% reduction in activity in April 2020 vs. April 2019 (A&amp;E and outpatient)</a><ul>
-<li><a href="#pooled-all-5-partners">Pooled (all 5 partners)</a></li>
+<li><a href="#pooled-excl.-wales">Pooled (excl. Wales)</a></li>
 <li><a href="#by-partner">By partner</a></li>
 </ul></li>
 <li><a href="#reduction-in-activity-in-april-2020-vs.-april-2019-elective-admissions">% reduction in activity in April 2020 vs. April 2019 (elective admissions)</a><ul>
@@ -346,15 +346,15 @@ code span.ot { color: #007020; }
 <li><a href="#by-partner-2">By partner</a></li>
 </ul></li>
 <li><a href="#jan-to-april-2020-change-in-grampian">Jan to April 2020 % change in Grampian</a></li>
-<li><a href="#change-in-absolute-numbers-march-july-2020-compared-to-2019-excl.-leeds">Change in absolute numbers March-July (2020 compared to 2019, excl. Leeds)</a></li>
+<li><a href="#change-in-absolute-numbers-march-july-2020-compared-to-2019-excl.-leeds-and-wales">Change in absolute numbers March-July (2020 compared to 2019, excl. Leeds and Wales)</a></li>
 <li><a href="#reduction-in-activity-in-april-2020-vs.-april-2019-by-age-group-and-type-of-healthcare">% reduction in activity in April 2020 vs. April 2019, by age group and type of healthcare</a><ul>
-<li><a href="#pooled">Pooled</a></li>
+<li><a href="#pooled-excl.-wales-1">Pooled (excl. Wales)</a></li>
 <li><a href="#pooled-excl.-leeds-1">Pooled (excl. Leeds)</a></li>
 <li><a href="#pooled-excl.-grampian-and-leeds-1">Pooled (excl. Grampian and Leeds)</a></li>
 <li><a href="#by-partner-3">By partner</a></li>
 </ul></li>
-<li><a href="#change-in-absolute-numbers-by-age-group-march-to-july-2020-compared-to-same-period-in-2019-excl.-leeds">Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excl. Leeds</a></li>
-<li><a href="#number-of-cev-people-by-age-group-excl.-leeds">Number of CEV people by age group (excl. Leeds)</a></li>
+<li><a href="#change-in-absolute-numbers-by-age-group-march-to-july-2020-compared-to-same-period-in-2019-excl.-leeds-and-wales">Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excl. Leeds and Wales</a></li>
+<li><a href="#number-of-cev-people-by-age-group-excl.-leeds-and-wales">Number of CEV people by age group (excl. Leeds and Wales)</a></li>
 <li><a href="#of-admissions-that-were-covid-related">% of admissions that were COVID-related</a><ul>
 <li><a href="#pooled-excl.-leeds-2">Pooled (excl. Leeds)</a></li>
 <li><a href="#by-partner-4">By partner</a></li>
@@ -362,7 +362,7 @@ code span.ot { color: #007020; }
 <li><a href="#total-number-of-patients-with-covid-excl.-leeds">Total number of patients with COVID (excl. Leeds)</a></li>
 <li><a href="#total-number-of-deaths">Total number of deaths</a></li>
 <li><a href="#cumulative-mortality-rate">Cumulative mortality rate</a><ul>
-<li><a href="#pooled-1">Pooled</a></li>
+<li><a href="#pooled">Pooled</a></li>
 <li><a href="#all-partners">All partners</a></li>
 </ul></li>
 </ul>
@@ -410,8 +410,8 @@ code span.ot { color: #007020; }
 <!-- ``` -->
 <div id="reduction-in-activity-in-april-2020-vs.-april-2019-ae-and-outpatient" class="section level2">
 <h2>% reduction in activity in April 2020 vs. April 2019 (A&amp;E and outpatient)</h2>
-<div id="pooled-all-5-partners" class="section level3">
-<h3>Pooled (all 5 partners)</h3>
+<div id="pooled-excl.-wales" class="section level3">
+<h3>Pooled (excl. Wales)</h3>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -432,10 +432,10 @@ pct_change
 AE_attendance
 </td>
 <td style="text-align:right;">
--8,754
+-6,705
 </td>
 <td style="text-align:right;">
--41.0
+-41.5
 </td>
 </tr>
 <tr>
@@ -443,10 +443,10 @@ AE_attendance
 outpatient_attendance
 </td>
 <td style="text-align:right;">
--67,241
+-45,703
 </td>
 <td style="text-align:right;">
--46.8
+-43.1
 </td>
 </tr>
 </tbody>
@@ -484,20 +484,6 @@ Grampian
 </td>
 <td style="text-align:right;">
 -17.1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-AE_attendance
-</td>
-<td style="text-align:left;">
-Wales
-</td>
-<td style="text-align:right;">
--2,049
-</td>
-<td style="text-align:right;">
--39.3
 </td>
 </tr>
 <tr>
@@ -596,20 +582,6 @@ NW London
 </td>
 <td style="text-align:right;">
 -47.2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-outpatient_attendance
-</td>
-<td style="text-align:left;">
-Wales
-</td>
-<td style="text-align:right;">
--21,538
-</td>
-<td style="text-align:right;">
--57.0
 </td>
 </tr>
 </tbody>
@@ -716,20 +688,6 @@ Liverpool-Wirral
 admissions_electives
 </td>
 <td style="text-align:left;">
-Leeds
-</td>
-<td style="text-align:right;">
--1,058
-</td>
-<td style="text-align:right;">
--49.4
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-admissions_electives
-</td>
-<td style="text-align:left;">
 NW London
 </td>
 <td style="text-align:right;">
@@ -815,20 +773,6 @@ Grampian
 admissions_emergency
 </td>
 <td style="text-align:left;">
-Leeds
-</td>
-<td style="text-align:right;">
--141
-</td>
-<td style="text-align:right;">
--14.6
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-admissions_emergency
-</td>
-<td style="text-align:left;">
 Liverpool-Wirral
 </td>
 <td style="text-align:right;">
@@ -874,8 +818,8 @@ NW London
 <h2>Jan to April 2020 % change in Grampian</h2>
 <pre><code>## [1] -27.7</code></pre>
 </div>
-<div id="change-in-absolute-numbers-march-july-2020-compared-to-2019-excl.-leeds" class="section level2">
-<h2>Change in absolute numbers March-July (2020 compared to 2019, excl. Leeds)</h2>
+<div id="change-in-absolute-numbers-march-july-2020-compared-to-2019-excl.-leeds-and-wales" class="section level2">
+<h2>Change in absolute numbers March-July (2020 compared to 2019, excl. Leeds and Wales)</h2>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -896,10 +840,10 @@ total_patients
 admissions_electives
 </td>
 <td style="text-align:right;">
--63,176
+-34,780
 </td>
 <td style="text-align:right;">
-326,739
+198,373
 </td>
 </tr>
 <tr>
@@ -907,10 +851,10 @@ admissions_electives
 admissions_emergency
 </td>
 <td style="text-align:right;">
--10,088
+-5,454
 </td>
 <td style="text-align:right;">
-326,739
+198,373
 </td>
 </tr>
 <tr>
@@ -918,10 +862,10 @@ admissions_emergency
 AE_attendance
 </td>
 <td style="text-align:right;">
--24,363
+-18,875
 </td>
 <td style="text-align:right;">
-326,739
+198,373
 </td>
 </tr>
 <tr>
@@ -929,10 +873,10 @@ AE_attendance
 outpatient_attendance
 </td>
 <td style="text-align:right;">
--228,752
+-144,262
 </td>
 <td style="text-align:right;">
-326,739
+198,373
 </td>
 </tr>
 </tbody>
@@ -940,8 +884,8 @@ outpatient_attendance
 </div>
 <div id="reduction-in-activity-in-april-2020-vs.-april-2019-by-age-group-and-type-of-healthcare" class="section level2">
 <h2>% reduction in activity in April 2020 vs. April 2019, by age group and type of healthcare</h2>
-<div id="pooled" class="section level3">
-<h3>Pooled</h3>
+<div id="pooled-excl.-wales-1" class="section level3">
+<h3>Pooled (excl. Wales)</h3>
 <table class="table table-striped table-hover" style="font-size: 8px; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -968,10 +912,10 @@ AE_attendance
 0-29
 </td>
 <td style="text-align:right;">
--1,082
+-898
 </td>
 <td style="text-align:right;">
--59.3
+-62.3
 </td>
 </tr>
 <tr>
@@ -982,10 +926,10 @@ AE_attendance
 70+
 </td>
 <td style="text-align:right;">
--3,375
+-2,550
 </td>
 <td style="text-align:right;">
--36.8
+-37.1
 </td>
 </tr>
 <tr>
@@ -996,10 +940,10 @@ outpatient_attendance
 0-29
 </td>
 <td style="text-align:right;">
--2,763
+-1,520
 </td>
 <td style="text-align:right;">
--29.3
+-23.4
 </td>
 </tr>
 <tr>
@@ -1010,10 +954,10 @@ outpatient_attendance
 70+
 </td>
 <td style="text-align:right;">
--31,707
+-21,722
 </td>
 <td style="text-align:right;">
--52.9
+-49.4
 </td>
 </tr>
 </tbody>
@@ -1197,23 +1141,6 @@ admissions_electives
 0-29
 </td>
 <td style="text-align:left;">
-Leeds
-</td>
-<td style="text-align:right;">
--31
-</td>
-<td style="text-align:right;">
--14.4
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-admissions_electives
-</td>
-<td style="text-align:left;">
-0-29
-</td>
-<td style="text-align:left;">
 Liverpool-Wirral
 </td>
 <td style="text-align:right;">
@@ -1299,23 +1226,6 @@ admissions_electives
 70+
 </td>
 <td style="text-align:left;">
-Leeds
-</td>
-<td style="text-align:right;">
--422
-</td>
-<td style="text-align:right;">
--61.7
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-admissions_electives
-</td>
-<td style="text-align:left;">
-70+
-</td>
-<td style="text-align:left;">
 Grampian
 </td>
 <td style="text-align:right;">
@@ -1357,23 +1267,6 @@ Grampian
 </td>
 <td style="text-align:right;">
 5.3
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-admissions_emergency
-</td>
-<td style="text-align:left;">
-0-29
-</td>
-<td style="text-align:left;">
-Leeds
-</td>
-<td style="text-align:right;">
--61
-</td>
-<td style="text-align:right;">
--53.5
 </td>
 </tr>
 <tr>
@@ -1452,23 +1345,6 @@ admissions_emergency
 70+
 </td>
 <td style="text-align:left;">
-Leeds
-</td>
-<td style="text-align:right;">
-7
-</td>
-<td style="text-align:right;">
-1.5
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-admissions_emergency
-</td>
-<td style="text-align:left;">
-70+
-</td>
-<td style="text-align:left;">
 Liverpool-Wirral
 </td>
 <td style="text-align:right;">
@@ -1537,23 +1413,6 @@ AE_attendance
 0-29
 </td>
 <td style="text-align:left;">
-Wales
-</td>
-<td style="text-align:right;">
--184
-</td>
-<td style="text-align:right;">
--48.0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-AE_attendance
-</td>
-<td style="text-align:left;">
-0-29
-</td>
-<td style="text-align:left;">
 Leeds
 </td>
 <td style="text-align:right;">
@@ -1612,23 +1471,6 @@ Grampian
 </td>
 <td style="text-align:right;">
 -9.3
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-AE_attendance
-</td>
-<td style="text-align:left;">
-70+
-</td>
-<td style="text-align:left;">
-Wales
-</td>
-<td style="text-align:right;">
--825
-</td>
-<td style="text-align:right;">
--35.7
 </td>
 </tr>
 <tr>
@@ -1741,23 +1583,6 @@ outpatient_attendance
 0-29
 </td>
 <td style="text-align:left;">
-Wales
-</td>
-<td style="text-align:right;">
--1,243
-</td>
-<td style="text-align:right;">
--42.4
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-outpatient_attendance
-</td>
-<td style="text-align:left;">
-0-29
-</td>
-<td style="text-align:left;">
 Grampian
 </td>
 <td style="text-align:right;">
@@ -1835,29 +1660,12 @@ NW London
 -53.3
 </td>
 </tr>
-<tr>
-<td style="text-align:left;">
-outpatient_attendance
-</td>
-<td style="text-align:left;">
-70+
-</td>
-<td style="text-align:left;">
-Wales
-</td>
-<td style="text-align:right;">
--9,985
-</td>
-<td style="text-align:right;">
--62.7
-</td>
-</tr>
 </tbody>
 </table>
 </div>
 </div>
-<div id="change-in-absolute-numbers-by-age-group-march-to-july-2020-compared-to-same-period-in-2019-excl.-leeds" class="section level2">
-<h2>Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excl. Leeds</h2>
+<div id="change-in-absolute-numbers-by-age-group-march-to-july-2020-compared-to-same-period-in-2019-excl.-leeds-and-wales" class="section level2">
+<h2>Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excl. Leeds and Wales</h2>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -1881,7 +1689,7 @@ admissions_electives
 0-29
 </td>
 <td style="text-align:right;">
--3,221
+-1,820
 </td>
 </tr>
 <tr>
@@ -1892,7 +1700,7 @@ admissions_electives
 70+
 </td>
 <td style="text-align:right;">
--27,577
+-14,328
 </td>
 </tr>
 <tr>
@@ -1903,7 +1711,7 @@ outpatient_attendance
 0-29
 </td>
 <td style="text-align:right;">
--9,195
+-4,286
 </td>
 </tr>
 <tr>
@@ -1914,14 +1722,14 @@ outpatient_attendance
 70+
 </td>
 <td style="text-align:right;">
--107,290
+-68,078
 </td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="number-of-cev-people-by-age-group-excl.-leeds" class="section level2">
-<h2>Number of CEV people by age group (excl. Leeds)</h2>
+<div id="number-of-cev-people-by-age-group-excl.-leeds-and-wales" class="section level2">
+<h2>Number of CEV people by age group (excl. Leeds and Wales)</h2>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -1945,7 +1753,7 @@ admissions_all
 0-29
 </td>
 <td style="text-align:right;">
-22,273
+12,985
 </td>
 </tr>
 <tr>
@@ -1956,7 +1764,7 @@ admissions_all
 30-49
 </td>
 <td style="text-align:right;">
-42,802
+25,595
 </td>
 </tr>
 <tr>
@@ -1967,7 +1775,7 @@ admissions_all
 50-69
 </td>
 <td style="text-align:right;">
-118,522
+68,122
 </td>
 </tr>
 <tr>
@@ -1978,7 +1786,7 @@ admissions_all
 70+
 </td>
 <td style="text-align:right;">
-131,092
+79,621
 </td>
 </tr>
 </tbody>
@@ -2093,20 +1901,6 @@ NW London
 5.5
 </td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Leeds
-</td>
-<td style="text-align:right;">
-9,470
-</td>
-<td style="text-align:right;">
-563
-</td>
-<td style="text-align:right;">
-5.9
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -2157,7 +1951,7 @@ total_deaths
 </div>
 <div id="cumulative-mortality-rate" class="section level2">
 <h2>Cumulative mortality rate</h2>
-<div id="pooled-1" class="section level3">
+<div id="pooled" class="section level3">
 <h3>Pooled</h3>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
