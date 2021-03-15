@@ -142,7 +142,7 @@ clean_colnames <- function(dataset){
 
 ### Pooled (excl. Wales)
 
-```{r apr.pct.change.pooled, echo=FALSE, message=FALSE, warning=FALSE}
+```{r apr.pct.change.pooled, echo=TRUE, message=FALSE, warning=FALSE}
 
 pooled.drop.april <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",partner!="Wales",
@@ -166,7 +166,7 @@ pooled.drop.april %>%
 
 ### By partner
 
-```{r apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r apr.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
 
 drop.april <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",partner!="Wales",
@@ -192,7 +192,7 @@ drop.april %>%
 
 ### Pooled (excl. Leeds)
 
-```{r elective.apr.pct.change.pooled, echo=FALSE, message=FALSE, warning=FALSE}
+```{r elective.apr.pct.change.pooled, echo=TRUE, message=FALSE, warning=FALSE}
 
 pooled.drop.april <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",partner!="Leeds",
@@ -215,7 +215,7 @@ pooled.drop.april %>%
 
 ### By partner
 
-```{r elective.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r elective.apr.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
 
 drop.april.bis <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",partner!="Leeds",
@@ -240,7 +240,7 @@ drop.april.bis %>%
 
 ### Pooled (excl. Grampian and Leeds)
 
-```{r emergency.pooled.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r emergency.pooled.apr.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
 
 drop.april.pooled.ng <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",partner!="Grampian",partner!="Leeds",
@@ -264,7 +264,7 @@ drop.april.pooled.ng %>%
 
 ### By partner
 
-```{r emergency.apr.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r emergency.apr.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
 
 drop.april.ae <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month=="2020-04",partner!="Leeds",
@@ -288,7 +288,7 @@ drop.april.ae %>%
 
 ## Jan to April 2020 % change in Grampian
 
-```{r grampian.pct.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r grampian.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
 
 grampian.emergency <- filter(table1.all.partners.pcts,strata=="overall",
        partner=="Grampian",
@@ -303,7 +303,7 @@ pct_change
 
 ## Change in absolute numbers March-July (2020 compared to 2019, excl. Leeds and Wales)
 
-```{r march.july.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r march.july.change, echo=TRUE, message=FALSE, warning=FALSE}
 
 table.abs.changes <- filter(table1.all.partners.pcts,strata=="overall",
                             year_month>="2020-03",
@@ -332,7 +332,7 @@ table.abs.changes %>%
 
 ### Pooled (excl. Wales)
 
-```{r apr.drop.by.age.pooled, echo=FALSE, message=FALSE, warning=FALSE}
+```{r apr.drop.by.age.pooled, echo=TRUE, message=FALSE, warning=FALSE}
 pooled.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
                             year_month=="2020-04",partner!="Wales",
                             breakdown.level %in% c("outpatient_attendance",
@@ -356,7 +356,7 @@ pooled.drop.april.by.age %>%
 
 ### Pooled (excl. Leeds)
 
-```{r apr.drop.by.age.pooled.ng, echo=FALSE, message=FALSE, warning=FALSE}
+```{r apr.drop.by.age.pooled.ng, echo=TRUE, message=FALSE, warning=FALSE}
 pooled.nl.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
                             year_month=="2020-04",partner!="Leeds",
                             breakdown.level %in% c("admissions_electives","admissions_emergency"),
@@ -379,7 +379,7 @@ pooled.nl.drop.april.by.age %>%
 
 ### Pooled (excl. Grampian and Leeds)
 
-```{r apr.drop.by.age.pooled.ngnl, echo=FALSE, message=FALSE, warning=FALSE}
+```{r apr.drop.by.age.pooled.ngnl, echo=TRUE, message=FALSE, warning=FALSE}
 pooled.ngnl.drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
                             year_month=="2020-04",partner!="Grampian",partner!="Leeds",
                             breakdown.level %in% c("admissions_emergency"),
@@ -402,7 +402,7 @@ pooled.ngnl.drop.april.by.age %>%
 
 ### By partner
 
-```{r apr.drop.by.age, echo=FALSE, message=FALSE, warning=FALSE}
+```{r apr.drop.by.age, echo=TRUE, message=FALSE, warning=FALSE}
 drop.april.by.age <- filter(table1.all.partners.pcts,breakdown=="age",
                             year_month=="2020-04",
                             !(partner=="Leeds"&breakdown.level=="admissions_electives"),
@@ -434,7 +434,7 @@ drop.april.by.age %>%
 
 ## Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excl. Leeds and Wales
 
-```{r march.july.age.change, echo=FALSE, message=FALSE, warning=FALSE}
+```{r march.july.age.change, echo=TRUE, message=FALSE, warning=FALSE}
 
 absolute_reduction_over_70 <- filter(table1.all.partners.pcts,breakdown=="age",
                                      breakdown.level %in% c("outpatient_attendance","admissions_electives"),
@@ -455,7 +455,7 @@ absolute_reduction_over_70 %>%
 
 ## Number of CEV people by age group (excl. Leeds and Wales)
 
-```{r cohort.size.age, echo=FALSE, message=FALSE, warning=FALSE}
+```{r cohort.size.age, echo=TRUE, message=FALSE, warning=FALSE}
 NDL_CEV_size <- filter(table1.all.partners,breakdown=="age",strata!="unknown",
                        breakdown.level %in% c("admissions_all"),
                        year_month=="2018-03",partner!="Leeds",partner!="Wales") %>%
@@ -474,7 +474,7 @@ NDL_CEV_size %>%
 
 ### Pooled (excl. Leeds)
 
-```{r pct.covid.pooled, echo=FALSE, message=FALSE, warning=FALSE}
+```{r pct.covid.pooled, echo=TRUE, message=FALSE, warning=FALSE}
 
 covid.adm.data <- filter(table1.all.partners,strata=="overall",
                         breakdown.level=="admissions_all",
@@ -495,7 +495,7 @@ pooled.covid %>%
 
 ### By partner
 
-```{r pct.covid.partners, echo=FALSE, message=FALSE, warning=FALSE}
+```{r pct.covid.partners, echo=TRUE, message=FALSE, warning=FALSE}
 
 covid.adm.data <- filter(table1.all.partners,strata=="overall",
                         breakdown.level=="admissions_all",
@@ -520,7 +520,7 @@ allp.covid %>%
 
 ## Total number of patients with COVID (excl. Leeds)
 
-```{r total.covid, echo=FALSE, message=FALSE, warning=FALSE}
+```{r total.covid, echo=TRUE, message=FALSE, warning=FALSE}
 
 total.covid.patients <- filter(table1.all.partners,strata=="overall",
                          breakdown.level=="admissions_all",
@@ -540,7 +540,7 @@ total.covid.patients %>%
 
 ## Total number of deaths
 
-```{r total.deaths, echo=FALSE, message=FALSE, warning=FALSE}
+```{r total.deaths, echo=TRUE, message=FALSE, warning=FALSE}
 
 total.deaths <- filter(table3.all.partners,location=="anywhere",
                        breakdown.level=="overall") %>%
@@ -558,7 +558,7 @@ total.deaths %>%
 
 ### Pooled
 
-```{r pooled.cum.deaths, echo=FALSE, message=FALSE, warning=FALSE}
+```{r pooled.cum.deaths, echo=TRUE, message=FALSE, warning=FALSE}
 
 total.deaths.cum.pooled <- filter(table3.all.partners,
                                   location=="anywhere",
@@ -581,7 +581,7 @@ total.deaths.cum.pooled %>%
 
 ### All partners
 
-```{r cum.deaths, echo=FALSE, message=FALSE, warning=FALSE}
+```{r cum.deaths, echo=TRUE, message=FALSE, warning=FALSE}
 
 total.deaths.cum <- filter(table3.all.partners,
                            year_month=="2020-07",
