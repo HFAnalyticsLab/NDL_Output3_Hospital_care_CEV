@@ -49,13 +49,13 @@ These scripts were written in R version 4.0.2 and RStudio Version 1.1.383.
 
 ## Authors
 
-* Karen Hodgson, The Health Foundation - [Twitter](https://twitter.com/KarenHodgePodge) - [GitHub](https://github.com/KarenHodgson)
-* Sebastien Peytrignet, The Health Foundation - [Twitter](https://twitter.com/SebastienPeytr2) - [GitHub](https://github.com/sg-peytrignet)
-* Jessica Butler, Aberdeen Centre for Health Data Science (ACHDS) - [Twitter](https://twitter.com/jessbutler284)
-* Alisha Davies, Public Health Wales - [Twitter](https://twitter.com/AlishaDavies1)
-* Sara Sekelj, Imperial College Health Partners - [Twitter](https://twitter.com/sekeljsara)
-* Simon Chambers, Wirral University Teaching Hospital NHS Foundation Trust
-* Frank Wood, NHS Leeds CCG
+* Karen Hodgson, The Health Foundation - [E-mail](karen.hodgson@health.org.uk) - [Twitter](https://twitter.com/KarenHodgePodge) - [GitHub](https://github.com/KarenHodgson)
+* Sebastien Peytrignet, The Health Foundation - [E-mail](sebastien.peytrignet@health.org.uk) - [Twitter](https://twitter.com/SebastienPeytr2) - [GitHub](https://github.com/sg-peytrignet)
+* Jessica Butler, Aberdeen Centre for Health Data Science (ACHDS) - [E-mail](jessicabutler@abdn.ac.uk) - [Twitter](https://twitter.com/jessbutler284)
+* Alisha Davies, Public Health Wales - [E-mail](Alisha.Davies@wales.nhs.uk) - [Twitter](https://twitter.com/AlishaDavies1)
+* Sara Sekelj, Imperial College Health Partners - [E-mail](Sara.Sekelj@imperialcollegehealthpartners.com) - [Twitter](https://twitter.com/sekeljsara)
+* Simon Chambers, Wirral University Teaching Hospital NHS Foundation Trust - [E-mail](Simon.Chambers@nhs.net)
+* Frank Wood, NHS Leeds CCG - [E-mail](Frank.Wood@leeds.gov.uk)
 
 ## License
 
