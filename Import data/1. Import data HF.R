@@ -123,11 +123,6 @@ totals <- fread(paste0(rawdatadir,"totals.csv"),
 table1 <- left_join(table1,select(totals,partner,breakdown,strata,total.patients),
                              by=c("partner","breakdown","strata"))
 
-#Remove duplicate column
-# table1$total.patients.x[which(is.na(table1$total.patients.x)==T&is.na(table1$total.patients.y)==F)] <- table1$total.patients.y[which(is.na(table1$total.patients.x)==T&is.na(table1$total.patients.y)==F)]
-# table1$total.patients.y <- NULL
-# table1 <- dplyr::rename(table1,total.patients=total.patients.x)
-
 #Table 2
 table2 <- left_join(table2,select(totals,partner,breakdown,breakdown.level,total.patients),
                              by=c("partner","breakdown","breakdown.level"))
@@ -219,12 +214,12 @@ rm(total.patients.rem)
 ##################### Rolling difference in activity  #####################
 ###########################################################################
 
-table1 <- table1 %>%
-  group_by(partner,breakdown,strata,breakdown.level) %>%
-  arrange(.,partner,breakdown,strata,breakdown.level,year_month) %>%
-  mutate(number.events_lm = dplyr::lag(number.events.sdc, n = 1, default = NA)) %>%
-  mutate(pct_change_activity=(number.events.sdc-number.events_lm)/number.events_lm*100) %>%
-  ungroup()
+# table1 <- table1 %>%
+#   group_by(partner,breakdown,strata,breakdown.level) %>%
+#   arrange(.,partner,breakdown,strata,breakdown.level,year_month) %>%
+#   mutate(number.events_lm = dplyr::lag(number.events.sdc, n = 1, default = NA)) %>%
+#   mutate(pct_change_activity=(number.events.sdc-number.events_lm)/number.events_lm*100) %>%
+#   ungroup()
 
 # filter(table1,partner=="NW London",strata=="overall",
 #        breakdown.level=="admissions_all",year_month>="2019-01") %>%

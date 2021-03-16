@@ -26,24 +26,6 @@ gitdir <- dirname(rstudioapi::getSourceEditorContext()$path)
 ##################### Table 1: HC usage #####################
 #############################################################
 
-#Don't import totals
-#FINAL COL NAMES
-#year_month	breakdown	breakdown.level	strata	number.patients	number.events
-
-#month	year	time_start	time_end	type	number.events	number.patients	total.patients
-#breakdown breakdown.level
-#admissions_emergency (OK)
-#admissions_electives
-#admissions_other
-#AE_attendance
-#all_admissions
-#outpatient_attendance
-# month	year	time_start	time_end	type	number.events	number.patients	total.patients
-
-#######################
-####### Table 1 ####### 
-#######################
-
 ###### Date formats
 
 month.lookup <- data.frame(month.number=c("01","02","03","04","05","06","07","08","09","10","11","12"),

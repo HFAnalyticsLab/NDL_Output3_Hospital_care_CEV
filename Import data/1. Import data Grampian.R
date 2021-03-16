@@ -26,20 +26,6 @@ gitdir <- dirname(rstudioapi::getSourceEditorContext()$path)
 ##################### Table 1: HC usage #####################
 #############################################################
 
-#month	year	time_start	time_end	type	number.events	number.patients	total.patients
-#breakdown breakdown.level
-#admissions_emergency (OK)
-#admissions_electives
-#admissions_other
-#AE_attendance
-#all_admissions
-#outpatient_attendance
-# month	year	time_start	time_end	type	number.events	number.patients	total.patients
-
-##############################
-####### Table 1, Overall #####
-##############################
-
 ###### Overall - all admissions
 
 table1.overall.grampian.all <- fread(paste0(rawdatadir,"Grampian-Aberdeen/grampian_health_care_usage/grampian_health_care_usage/","hospital_admissions_total.csv"),

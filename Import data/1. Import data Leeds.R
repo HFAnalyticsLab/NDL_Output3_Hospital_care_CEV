@@ -26,24 +26,6 @@ gitdir <- dirname(rstudioapi::getSourceEditorContext()$path)
 ##################### Table 1: HC usage #####################
 #############################################################
 
-#Don't import totals
-#FINAL COL NAMES
-#year_month	breakdown	breakdown.level	strata	number.patients	number.events
-
-#month	year	time_start	time_end	type	number.events	number.patients	total.patients
-#breakdown breakdown.level
-#admissions_emergency (OK)
-#admissions_electives
-#admissions_other
-#AE_attendance
-#all_admissions
-#outpatient_attendance
-# month	year	time_start	time_end	type	number.events	number.patients	total.patients
-
-#######################
-####### Table 1 ####### 
-#######################
-
 ###### Overall
 
 table1.overall.leeds <- read_excel(paste0(rawdatadir,"Leeds/","Output_3B_Tables_Leeds4.xlsx"),
