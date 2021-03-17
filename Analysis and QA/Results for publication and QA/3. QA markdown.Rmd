@@ -1,7 +1,7 @@
 ---
 title: "Networked Data Lab, hospital use among CEV people during COVID-19"
 author: "Sebastien Peytrignet"
-date: "3/11/2021"
+date: "3/17/2021"
 output:
   prettydoc::html_pretty:
     theme: architect
