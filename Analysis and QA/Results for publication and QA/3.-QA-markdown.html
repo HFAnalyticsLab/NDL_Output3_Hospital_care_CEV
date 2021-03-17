@@ -438,7 +438,7 @@ code span.ot { color: #007020; }
 <li><a href="#jan-2020-to-april-2020-change-in-grampian">Jan 2020 to April 2020 % change in Grampian</a></li>
 <li><a href="#reduction-in-activity-in-april-2020-vs.-april-2019-by-age-group-and-type-of-healthcare">% reduction in activity in April 2020 vs. April 2019, by age group and type of healthcare</a><ul>
 <li><a href="#pooled-elective-admissions-ae-and-outpatient-attendances-excl.-wales-ae-and-wales-outpatient">Pooled (elective admissions, A&amp;E and outpatient attendances, excl. Wales A&amp;E and Wales outpatient)</a></li>
-<li><a href="#pooled-emergency-admissions-excl.-grampian">Pooled (emergency admissions, excl. Grampian)</a></li>
+<li><a href="#pooled-emergency-admissions-incl.-grampian">Pooled (emergency admissions, incl. Grampian)</a></li>
 <li><a href="#by-partner-2">By partner</a></li>
 </ul></li>
 <li><a href="#of-admissions-that-were-covid-related">% of admissions that were COVID-related</a><ul>
@@ -1185,28 +1185,27 @@ outpatient_attendance
 </tbody>
 </table>
 </div>
-<div id="pooled-emergency-admissions-excl.-grampian" class="section level3">
-<h3>Pooled (emergency admissions, excl. Grampian)</h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>pooled.ng.drop.april.by.age &lt;-<span class="st"> </span>table1.all.partners.pcts <span class="op">%&gt;%</span></span>
+<div id="pooled-emergency-admissions-incl.-grampian" class="section level3">
+<h3>Pooled (emergency admissions, incl. Grampian)</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>pooled.drop.april.by.age.ea &lt;-<span class="st"> </span>table1.all.partners.pcts <span class="op">%&gt;%</span></span>
 <span id="cb9-2"><a href="#cb9-2"></a><span class="st">  </span><span class="kw">filter</span>(.,breakdown<span class="op">==</span><span class="st">&quot;age&quot;</span>,</span>
 <span id="cb9-3"><a href="#cb9-3"></a>         year_month<span class="op">==</span><span class="st">&quot;2020-04&quot;</span>,</span>
-<span id="cb9-4"><a href="#cb9-4"></a>         partner<span class="op">!=</span><span class="st">&quot;Grampian&quot;</span>,</span>
-<span id="cb9-5"><a href="#cb9-5"></a>         breakdown.level <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;admissions_emergency&quot;</span>),</span>
-<span id="cb9-6"><a href="#cb9-6"></a>         strata <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;0-29&quot;</span>,<span class="st">&quot;70+&quot;</span>)) <span class="op">%&gt;%</span></span>
-<span id="cb9-7"><a href="#cb9-7"></a><span class="st">  </span><span class="kw">select</span>(.,partner,strata,breakdown.level,year_month,</span>
-<span id="cb9-8"><a href="#cb9-8"></a>         number.events.sdc_l1,number.events.sdc,</span>
-<span id="cb9-9"><a href="#cb9-9"></a>         abs_change_12m) <span class="op">%&gt;%</span></span>
-<span id="cb9-10"><a href="#cb9-10"></a><span class="st">  </span><span class="kw">group_by</span>(breakdown.level,strata) <span class="op">%&gt;%</span></span>
-<span id="cb9-11"><a href="#cb9-11"></a><span class="st">  </span><span class="kw">summarise</span>(.,<span class="dt">number.events.sdc_l1=</span><span class="kw">sum</span>(number.events.sdc_l1,<span class="dt">na.rm=</span><span class="ot">TRUE</span>),</span>
-<span id="cb9-12"><a href="#cb9-12"></a>            <span class="dt">abs_change_12m=</span><span class="kw">sum</span>(abs_change_12m,<span class="dt">na.rm=</span><span class="ot">TRUE</span>)) <span class="op">%&gt;%</span></span>
-<span id="cb9-13"><a href="#cb9-13"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></span>
-<span id="cb9-14"><a href="#cb9-14"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">pct_change=</span>abs_change_12m<span class="op">/</span>number.events.sdc_l1<span class="op">*</span><span class="dv">100</span>) <span class="op">%&gt;%</span></span>
-<span id="cb9-15"><a href="#cb9-15"></a><span class="st">  </span><span class="kw">select</span>(.,breakdown.level,strata,abs_change_12m,pct_change) <span class="op">%&gt;%</span></span>
-<span id="cb9-16"><a href="#cb9-16"></a><span class="st">  </span><span class="kw">clean_colnames</span>(.)</span>
-<span id="cb9-17"><a href="#cb9-17"></a></span>
-<span id="cb9-18"><a href="#cb9-18"></a>pooled.ng.drop.april.by.age <span class="op">%&gt;%</span></span>
-<span id="cb9-19"><a href="#cb9-19"></a><span class="st">  </span><span class="kw">kable</span>(.,<span class="dt">digits=</span><span class="dv">1</span>,<span class="dt">format.args =</span> <span class="kw">list</span>(<span class="dt">big.mark =</span> <span class="st">&quot;,&quot;</span>)) <span class="op">%&gt;%</span></span>
-<span id="cb9-20"><a href="#cb9-20"></a><span class="st">  </span><span class="kw">kable_styling</span>(.,<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, <span class="st">&quot;hover&quot;</span>),<span class="dt">full_width =</span> F, <span class="dt">font_size=</span> <span class="dv">8</span>)</span></code></pre></div>
+<span id="cb9-4"><a href="#cb9-4"></a>         breakdown.level <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;admissions_emergency&quot;</span>),</span>
+<span id="cb9-5"><a href="#cb9-5"></a>         strata <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;0-29&quot;</span>,<span class="st">&quot;70+&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="st">  </span><span class="kw">select</span>(.,partner,strata,breakdown.level,year_month,</span>
+<span id="cb9-7"><a href="#cb9-7"></a>         number.events.sdc_l1,number.events.sdc,</span>
+<span id="cb9-8"><a href="#cb9-8"></a>         abs_change_12m) <span class="op">%&gt;%</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="st">  </span><span class="kw">group_by</span>(breakdown.level,strata) <span class="op">%&gt;%</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="st">  </span><span class="kw">summarise</span>(.,<span class="dt">number.events.sdc_l1=</span><span class="kw">sum</span>(number.events.sdc_l1,<span class="dt">na.rm=</span><span class="ot">TRUE</span>),</span>
+<span id="cb9-11"><a href="#cb9-11"></a>            <span class="dt">abs_change_12m=</span><span class="kw">sum</span>(abs_change_12m,<span class="dt">na.rm=</span><span class="ot">TRUE</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">pct_change=</span>abs_change_12m<span class="op">/</span>number.events.sdc_l1<span class="op">*</span><span class="dv">100</span>) <span class="op">%&gt;%</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="st">  </span><span class="kw">select</span>(.,breakdown.level,strata,abs_change_12m,pct_change) <span class="op">%&gt;%</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="st">  </span><span class="kw">clean_colnames</span>(.)</span>
+<span id="cb9-16"><a href="#cb9-16"></a></span>
+<span id="cb9-17"><a href="#cb9-17"></a>pooled.drop.april.by.age.ea <span class="op">%&gt;%</span></span>
+<span id="cb9-18"><a href="#cb9-18"></a><span class="st">  </span><span class="kw">kable</span>(.,<span class="dt">digits=</span><span class="dv">1</span>,<span class="dt">format.args =</span> <span class="kw">list</span>(<span class="dt">big.mark =</span> <span class="st">&quot;,&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb9-19"><a href="#cb9-19"></a><span class="st">  </span><span class="kw">kable_styling</span>(.,<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, <span class="st">&quot;hover&quot;</span>),<span class="dt">full_width =</span> F, <span class="dt">font_size=</span> <span class="dv">8</span>)</span></code></pre></div>
 <table class="table table-striped table-hover" style="font-size: 8px; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -1233,10 +1232,10 @@ admissions_emergency
 0-29
 </td>
 <td style="text-align:right;">
--692
+-689
 </td>
 <td style="text-align:right;">
--61.6
+-58.4
 </td>
 </tr>
 <tr>
@@ -1247,10 +1246,10 @@ admissions_emergency
 70+
 </td>
 <td style="text-align:right;">
--1,646
+-1,617
 </td>
 <td style="text-align:right;">
--26.9
+-25.5
 </td>
 </tr>
 </tbody>

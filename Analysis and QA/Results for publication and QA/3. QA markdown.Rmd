@@ -313,13 +313,12 @@ pooled.drop.april.by.age %>%
   kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
 ```
 
-### Pooled (emergency admissions, excl. Grampian)
+### Pooled (emergency admissions, incl. Grampian)
 
-```{r apr.drop.by.age.pooled.ng, echo=TRUE, message=FALSE, warning=FALSE}
-pooled.ng.drop.april.by.age <- table1.all.partners.pcts %>%
+```{r apr.drop.by.age.pooled.ea, echo=TRUE, message=FALSE, warning=FALSE}
+pooled.drop.april.by.age.ea <- table1.all.partners.pcts %>%
   filter(.,breakdown=="age",
          year_month=="2020-04",
-         partner!="Grampian",
          breakdown.level %in% c("admissions_emergency"),
          strata %in% c("0-29","70+")) %>%
   select(.,partner,strata,breakdown.level,year_month,
@@ -333,7 +332,7 @@ pooled.ng.drop.april.by.age <- table1.all.partners.pcts %>%
   select(.,breakdown.level,strata,abs_change_12m,pct_change) %>%
   clean_colnames(.)
 
-pooled.ng.drop.april.by.age %>%
+pooled.drop.april.by.age.ea %>%
   kable(.,digits=1,format.args = list(big.mark = ",")) %>%
   kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
 ```
