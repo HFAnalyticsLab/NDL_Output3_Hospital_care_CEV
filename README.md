@@ -40,7 +40,7 @@ This analysis relies on the following data sources, which have been accessed by 
 The repository contains the following folders:
 
 - **Import data:** this contains the R codes used to read in and process individuals outputs from each of the five Networked Data Lab partners, and includes the code used to create our main outcome variables.
-- **Analysis and QA:** this contains the R codes used by each of the Networked Data Lab partners to produce their individual outputs and covers both data processing and analysis. The markdown file '3. QA markdown.Rmd' contains the [key statistics](https://htmlpreview.github.io/?https://github.com/HFAnalyticsLab/NDL_Output3_Hospital_care_CEV/blob/main/Analysis%20and%20QA/Results%20for%20publication%20and%20QA/3.-QA-markdown.html) which were then reported in our long chart.
+- **Analysis and QA:** this contains the R codes used by each of the Networked Data Lab partners to produce their individual outputs and covers both data processing and analysis. The markdown file '3. QA markdown.Rmd' contains the [key statistics](https://htmlpreview.github.io/?https://github.com/HFAnalyticsLab/NDL_Output3_Hospital_care_CEV/blob/main/Analysis%20and%20QA/Results%20for%20publication%20and%20QA/3.-QA-markdown.html) which were then reported in our long chart, alongside the code used to produce them.
 - **Data release:** this contains the [open data release](https://github.com/HFAnalyticsLab/NDL_Output1_Demographics/blob/main/Outputs/Networked-Data-Lab-Characteristics-of-CEV-people-GitHub.xlsx) with the summary statistics produced by all partners (after applying statistical disclosure control methods).
 
 ### Requirements
@@ -56,7 +56,7 @@ These scripts were written in R version 4.0.2 and RStudio Version 1.1.383.
 * Alisha Davies, Public Health Wales - [E-mail](Alisha.Davies@wales.nhs.uk) - [Twitter](https://twitter.com/AlishaDavies1)
 * Sara Sekelj, Imperial College Health Partners - [E-mail](Sara.Sekelj@imperialcollegehealthpartners.com) - [Twitter](https://twitter.com/sekeljsara)
 * Simon Chambers, Wirral University Teaching Hospital NHS Foundation Trust - [E-mail](Simon.Chambers@nhs.net)
-* Frank Wood, NHS Leeds CCG - [E-mail](Frank.Wood@leeds.gov.uk)
+* Frank Wood, NHS Leeds CCG and Leeds City Council - [E-mail](Frank.Wood@leeds.gov.uk)
 
 ## License
 
