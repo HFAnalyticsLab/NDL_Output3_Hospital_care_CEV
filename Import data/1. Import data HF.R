@@ -110,9 +110,9 @@ table3 <- plyr::rbind.fill(table3.grampian,table3.wales,table3.nwlondon,table3.l
 table3 <- filter(table3,!(is.na(number.patients)))
 rm(table3.grampian,table3.wales,table3.nwlondon,table3.liverpoolwirral,table3.leeds)
 
-###############################################################################
-##################### Merge in totals (for some partners) #####################
-###############################################################################
+###########################################################
+##################### Merge in totals #####################
+###########################################################
 
 totals <- fread(paste0(rawdatadir,"totals.csv"),
                                header=TRUE, sep=",", check.names=T) %>%
@@ -230,9 +230,6 @@ rm(total.patients.rem)
 ###################################################################################
 
 table2.covid <- table2 %>%
-  mutate(.,type=ifelse(type=="COVID_admissions_any_diagnosis",
-                       "COVID19_admissions_any_diagnosis",
-                       type)) %>%
   filter(.,type=="COVID19_admissions_any_diagnosis") %>%
   select(.,partner,year_month,breakdown,breakdown.level,number.patients.sdc) %>%
   dplyr::rename(.,number.patients.covid=number.patients.sdc,
