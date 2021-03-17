@@ -69,7 +69,6 @@ table3.all.partners <- fread("Visualize data/Data/table3.all.partners.csv",
 #and computes the absolute and relative difference
 
 table1.all.partners.pcts <-  table1.all.partners %>%
-  filter(., !(breakdown.level %in% c("admissions_other","admissions_all"))) %>%
   filter(., !(strata %in% c("unknown","unknown/other"))) %>%
   select(.,partner,year_month,year_month_day,strata,breakdown,breakdown.level,
          number.events.sdc,total.patients,year,month,date_text) %>%
