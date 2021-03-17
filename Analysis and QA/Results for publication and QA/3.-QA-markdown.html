@@ -418,7 +418,7 @@ code span.ot { color: #007020; }
 <div class="inner">
 <h1 class="title toc-ignore">Networked Data Lab, hospital use among CEV people during COVID-19</h1>
 <h3 class="author">Sebastien Peytrignet</h3>
-<h3 class="date">3/11/2021</h3>
+<h3 class="date">3/17/2021</h3>
 </div>
 </header>
 
@@ -498,38 +498,37 @@ code span.ot { color: #007020; }
 <span id="cb1-36"><a href="#cb1-36"></a><span class="co">#and computes the absolute and relative difference</span></span>
 <span id="cb1-37"><a href="#cb1-37"></a></span>
 <span id="cb1-38"><a href="#cb1-38"></a>table1.all.partners.pcts &lt;-<span class="st">  </span>table1.all.partners <span class="op">%&gt;%</span></span>
-<span id="cb1-39"><a href="#cb1-39"></a><span class="st">  </span><span class="kw">filter</span>(., <span class="op">!</span>(breakdown.level <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;admissions_other&quot;</span>,<span class="st">&quot;admissions_all&quot;</span>))) <span class="op">%&gt;%</span></span>
-<span id="cb1-40"><a href="#cb1-40"></a><span class="st">  </span><span class="kw">filter</span>(., <span class="op">!</span>(strata <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;unknown&quot;</span>,<span class="st">&quot;unknown/other&quot;</span>))) <span class="op">%&gt;%</span></span>
-<span id="cb1-41"><a href="#cb1-41"></a><span class="st">  </span><span class="kw">select</span>(.,partner,year_month,year_month_day,strata,breakdown,breakdown.level,</span>
-<span id="cb1-42"><a href="#cb1-42"></a>         number.events.sdc,total.patients,year,month,date_text) <span class="op">%&gt;%</span></span>
-<span id="cb1-43"><a href="#cb1-43"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">year_month_day=</span>lubridate<span class="op">::</span><span class="kw">ymd</span>(year_month_day),</span>
-<span id="cb1-44"><a href="#cb1-44"></a>         <span class="dt">year_l1=</span>(<span class="kw">as.numeric</span>(year)<span class="op">-</span><span class="dv">1</span>)) <span class="op">%&gt;%</span></span>
-<span id="cb1-45"><a href="#cb1-45"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">year_month_day_l1=</span>lubridate<span class="op">::</span><span class="kw">ymd</span>(<span class="kw">paste</span>(year_l1,month,<span class="st">&quot;01&quot;</span>,<span class="dt">sep=</span><span class="st">&quot;-&quot;</span>)),</span>
-<span id="cb1-46"><a href="#cb1-46"></a>         <span class="dt">keyone=</span><span class="kw">paste</span>(partner,breakdown,strata,breakdown.level,<span class="dt">sep=</span><span class="st">&quot;-&quot;</span>))</span>
-<span id="cb1-47"><a href="#cb1-47"></a></span>
-<span id="cb1-48"><a href="#cb1-48"></a><span class="co">#Lags data</span></span>
-<span id="cb1-49"><a href="#cb1-49"></a>table1.all.partners.pcts.l1 &lt;-<span class="st"> </span>table1.all.partners.pcts <span class="op">%&gt;%</span></span>
-<span id="cb1-50"><a href="#cb1-50"></a><span class="st">  </span><span class="kw">select</span>(.,keyone,year_month_day,number.events.sdc) <span class="op">%&gt;%</span></span>
-<span id="cb1-51"><a href="#cb1-51"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">rename</span>(.,<span class="dt">number.events.sdc_l1=</span>number.events.sdc,</span>
-<span id="cb1-52"><a href="#cb1-52"></a>                <span class="dt">year_month_day_l1=</span>year_month_day)</span>
-<span id="cb1-53"><a href="#cb1-53"></a></span>
-<span id="cb1-54"><a href="#cb1-54"></a><span class="co">#Merged back into main data</span></span>
-<span id="cb1-55"><a href="#cb1-55"></a>table1.all.partners.pcts &lt;-<span class="st"> </span><span class="kw">left_join</span>(table1.all.partners.pcts,</span>
-<span id="cb1-56"><a href="#cb1-56"></a>                                      table1.all.partners.pcts.l1,</span>
-<span id="cb1-57"><a href="#cb1-57"></a>                                      <span class="dt">by=</span><span class="kw">c</span>(<span class="st">&quot;keyone&quot;</span>,<span class="st">&quot;year_month_day_l1&quot;</span>)) <span class="op">%&gt;%</span></span>
-<span id="cb1-58"><a href="#cb1-58"></a><span class="st">  </span><span class="kw">select</span>(.,<span class="op">-</span><span class="kw">c</span>(<span class="st">&quot;keyone&quot;</span>,<span class="st">&quot;year_l1&quot;</span>)) <span class="op">%&gt;%</span></span>
-<span id="cb1-59"><a href="#cb1-59"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">pct_change_20to19=</span>(number.events.sdc<span class="op">-</span>number.events.sdc_l1)<span class="op">/</span>number.events.sdc_l1<span class="op">*</span><span class="dv">100</span>,</span>
-<span id="cb1-60"><a href="#cb1-60"></a>         <span class="dt">abs_change_12m=</span>(number.events.sdc<span class="op">-</span>number.events.sdc_l1)) <span class="op">%&gt;%</span></span>
-<span id="cb1-61"><a href="#cb1-61"></a><span class="st">  </span><span class="kw">filter</span>(.,year_month<span class="op">&gt;=</span><span class="st">&quot;2019-07&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb1-62"><a href="#cb1-62"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">year_month_day=</span>lubridate<span class="op">::</span><span class="kw">ymd</span>(year_month_day)) <span class="op">%&gt;%</span></span>
-<span id="cb1-63"><a href="#cb1-63"></a><span class="st">  </span><span class="kw">arrange</span>(.,partner,breakdown,strata,breakdown.level,year_month)</span>
-<span id="cb1-64"><a href="#cb1-64"></a><span class="kw">rm</span>(table1.all.partners.pcts.l1)</span>
-<span id="cb1-65"><a href="#cb1-65"></a></span>
-<span id="cb1-66"><a href="#cb1-66"></a><span class="co">#Function to clean column names</span></span>
-<span id="cb1-67"><a href="#cb1-67"></a>clean_colnames &lt;-<span class="st"> </span><span class="cf">function</span>(dataset){</span>
-<span id="cb1-68"><a href="#cb1-68"></a>  <span class="kw">names</span>(dataset) &lt;-<span class="st"> </span><span class="kw">str_replace_all</span>(<span class="kw">names</span>(dataset),<span class="st">&quot;</span><span class="ch">\\</span><span class="st">.&quot;</span>,<span class="st">&quot;_&quot;</span>)</span>
-<span id="cb1-69"><a href="#cb1-69"></a>  <span class="kw">return</span>(dataset)</span>
-<span id="cb1-70"><a href="#cb1-70"></a>}</span></code></pre></div>
+<span id="cb1-39"><a href="#cb1-39"></a><span class="st">  </span><span class="kw">filter</span>(., <span class="op">!</span>(strata <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;unknown&quot;</span>,<span class="st">&quot;unknown/other&quot;</span>))) <span class="op">%&gt;%</span></span>
+<span id="cb1-40"><a href="#cb1-40"></a><span class="st">  </span><span class="kw">select</span>(.,partner,year_month,year_month_day,strata,breakdown,breakdown.level,</span>
+<span id="cb1-41"><a href="#cb1-41"></a>         number.events.sdc,total.patients,year,month,date_text) <span class="op">%&gt;%</span></span>
+<span id="cb1-42"><a href="#cb1-42"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">year_month_day=</span>lubridate<span class="op">::</span><span class="kw">ymd</span>(year_month_day),</span>
+<span id="cb1-43"><a href="#cb1-43"></a>         <span class="dt">year_l1=</span>(<span class="kw">as.numeric</span>(year)<span class="op">-</span><span class="dv">1</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb1-44"><a href="#cb1-44"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">year_month_day_l1=</span>lubridate<span class="op">::</span><span class="kw">ymd</span>(<span class="kw">paste</span>(year_l1,month,<span class="st">&quot;01&quot;</span>,<span class="dt">sep=</span><span class="st">&quot;-&quot;</span>)),</span>
+<span id="cb1-45"><a href="#cb1-45"></a>         <span class="dt">keyone=</span><span class="kw">paste</span>(partner,breakdown,strata,breakdown.level,<span class="dt">sep=</span><span class="st">&quot;-&quot;</span>))</span>
+<span id="cb1-46"><a href="#cb1-46"></a></span>
+<span id="cb1-47"><a href="#cb1-47"></a><span class="co">#Lags data</span></span>
+<span id="cb1-48"><a href="#cb1-48"></a>table1.all.partners.pcts.l1 &lt;-<span class="st"> </span>table1.all.partners.pcts <span class="op">%&gt;%</span></span>
+<span id="cb1-49"><a href="#cb1-49"></a><span class="st">  </span><span class="kw">select</span>(.,keyone,year_month_day,number.events.sdc) <span class="op">%&gt;%</span></span>
+<span id="cb1-50"><a href="#cb1-50"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">rename</span>(.,<span class="dt">number.events.sdc_l1=</span>number.events.sdc,</span>
+<span id="cb1-51"><a href="#cb1-51"></a>                <span class="dt">year_month_day_l1=</span>year_month_day)</span>
+<span id="cb1-52"><a href="#cb1-52"></a></span>
+<span id="cb1-53"><a href="#cb1-53"></a><span class="co">#Merged back into main data</span></span>
+<span id="cb1-54"><a href="#cb1-54"></a>table1.all.partners.pcts &lt;-<span class="st"> </span><span class="kw">left_join</span>(table1.all.partners.pcts,</span>
+<span id="cb1-55"><a href="#cb1-55"></a>                                      table1.all.partners.pcts.l1,</span>
+<span id="cb1-56"><a href="#cb1-56"></a>                                      <span class="dt">by=</span><span class="kw">c</span>(<span class="st">&quot;keyone&quot;</span>,<span class="st">&quot;year_month_day_l1&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb1-57"><a href="#cb1-57"></a><span class="st">  </span><span class="kw">select</span>(.,<span class="op">-</span><span class="kw">c</span>(<span class="st">&quot;keyone&quot;</span>,<span class="st">&quot;year_l1&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb1-58"><a href="#cb1-58"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">pct_change_20to19=</span>(number.events.sdc<span class="op">-</span>number.events.sdc_l1)<span class="op">/</span>number.events.sdc_l1<span class="op">*</span><span class="dv">100</span>,</span>
+<span id="cb1-59"><a href="#cb1-59"></a>         <span class="dt">abs_change_12m=</span>(number.events.sdc<span class="op">-</span>number.events.sdc_l1)) <span class="op">%&gt;%</span></span>
+<span id="cb1-60"><a href="#cb1-60"></a><span class="st">  </span><span class="kw">filter</span>(.,year_month<span class="op">&gt;=</span><span class="st">&quot;2019-07&quot;</span>) <span class="op">%&gt;%</span></span>
+<span id="cb1-61"><a href="#cb1-61"></a><span class="st">  </span><span class="kw">mutate</span>(.,<span class="dt">year_month_day=</span>lubridate<span class="op">::</span><span class="kw">ymd</span>(year_month_day)) <span class="op">%&gt;%</span></span>
+<span id="cb1-62"><a href="#cb1-62"></a><span class="st">  </span><span class="kw">arrange</span>(.,partner,breakdown,strata,breakdown.level,year_month)</span>
+<span id="cb1-63"><a href="#cb1-63"></a><span class="kw">rm</span>(table1.all.partners.pcts.l1)</span>
+<span id="cb1-64"><a href="#cb1-64"></a></span>
+<span id="cb1-65"><a href="#cb1-65"></a><span class="co">#Function to clean column names</span></span>
+<span id="cb1-66"><a href="#cb1-66"></a>clean_colnames &lt;-<span class="st"> </span><span class="cf">function</span>(dataset){</span>
+<span id="cb1-67"><a href="#cb1-67"></a>  <span class="kw">names</span>(dataset) &lt;-<span class="st"> </span><span class="kw">str_replace_all</span>(<span class="kw">names</span>(dataset),<span class="st">&quot;</span><span class="ch">\\</span><span class="st">.&quot;</span>,<span class="st">&quot;_&quot;</span>)</span>
+<span id="cb1-68"><a href="#cb1-68"></a>  <span class="kw">return</span>(dataset)</span>
+<span id="cb1-69"><a href="#cb1-69"></a>}</span></code></pre></div>
 <!-- ## Activity levels in January 2020 -->
 <!-- ### Pooled -->
 <!-- ```{r jan.levels.pooled, echo=FALSE, message=FALSE, warning=FALSE} -->
