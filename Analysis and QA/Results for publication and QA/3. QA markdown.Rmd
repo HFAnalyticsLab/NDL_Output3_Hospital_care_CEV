@@ -14,10 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #Load packages
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(dplyr,stringr,sp,ggplot2,plyr,readODS,
-               gmodels,DescTools,data.table,
-               tibble,pbapply,pbmcapply,here,
-               tidyverse,readxl,plotly,hrbrthemes,RColorBrewer,
+pacman::p_load(dplyr,stringr,sp,ggplot2,readODS,
+               gmodels,data.table,tibble,tidyverse,
+               readxl,plotly,hrbrthemes,RColorBrewer,
                knitr,kableExtra)
 
 rm(list = ls())
@@ -52,7 +51,7 @@ table1.all.partners <- fread("Visualize data/Data/table1.all.partners.csv",
   left_join(.,month.lookup,by=c("month"="month.number")) %>%
   mutate(.,date_text=paste(month.full,year,sep=" "),
          year_month_day=paste(year_month,"01",sep="-")) %>%
-  filter(.,!(breakdown.level %in% c("admissions_other","admissions_all")),
+  filter(.,!(breakdown.level %in% c("admissions_other")),
            !(partner=="Wales"&breakdown.level=="outpatient_attendance"),
            !(partner=="Wales"&breakdown.level=="AE_attendance"))
 
@@ -157,7 +156,8 @@ clean_colnames <- function(dataset){
 
 pooled.drop.april <- table1.all.partners.pcts %>% 
   filter(.,strata=="overall",year_month=="2020-04",
-         breakdown.level!="admissions_emergency") %>%
+         breakdown.level!="admissions_emergency",
+         breakdown.level!="admissions_all") %>%
   select(.,breakdown.level,partner,year_month,
          number.events.sdc_l1,number.events.sdc,
          abs_change_12m) %>%
@@ -180,7 +180,8 @@ pooled.drop.april %>%
 
 drop.april <- table1.all.partners.pcts %>%
   filter(.,strata=="overall",year_month=="2020-04",
-         breakdown.level!="admissions_emergency") %>%
+         breakdown.level!="admissions_emergency",
+         breakdown.level!="admissions_all") %>%
   select(.,breakdown.level,partner,year_month,
          number.events.sdc_l1,number.events.sdc,abs_change_12m) %>%
   group_by(breakdown.level,partner) %>%
@@ -295,6 +296,7 @@ pct_change
 pooled.drop.april.by.age <- table1.all.partners.pcts %>% filter(.,
                             breakdown=="age",
                             breakdown.level!="admissions_emergency",
+                            breakdown.level!="admissions_all",
                             year_month=="2020-04",
                             strata %in% c("0-29","70+")) %>%
   select(.,partner,strata,breakdown.level,year_month,
@@ -492,9 +494,8 @@ total.deaths %>%
 
 ```{r pooled.cum.deaths, echo=TRUE, message=FALSE, warning=FALSE}
 
-total.deaths.cum.pooled <- table3.all.partners %>% filter(.,
-                                  location=="anywhere",
-                                  breakdown.level=="overall") %>%
+total.deaths.cum.pooled <- table3.all.partners %>%
+  filter(.,location=="anywhere",breakdown.level=="overall") %>%
   select(.,location,year_month,partner,number.patients.sdc,total.patients) %>%
   group_by(partner) %>%
   summarise(.,number.patients.sdc=sum(number.patients.sdc,na.rm=TRUE),
