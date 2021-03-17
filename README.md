@@ -41,7 +41,7 @@ The repository contains the following folders:
 
 - **Import data:** this contains the R codes used to read in and process individuals outputs from each of the five Networked Data Lab partners, and includes the code used to create our main outcome variables.
 - **Analysis and QA:** this contains the R codes used by each of the Networked Data Lab partners to produce their individual outputs and covers both data processing and analysis. The markdown file '3. QA markdown.Rmd' contains the [key statistics](https://htmlpreview.github.io/?https://github.com/HFAnalyticsLab/NDL_Output3_Hospital_care_CEV/blob/main/Analysis%20and%20QA/Results%20for%20publication%20and%20QA/3.-QA-markdown.html) which were then reported in our long chart, alongside the code used to produce them.
-- **Data release:** this contains the [open data release](https://github.com/HFAnalyticsLab/NDL_Output1_Demographics/blob/main/Outputs/Networked-Data-Lab-Characteristics-of-CEV-people-GitHub.xlsx) with the summary statistics produced by all partners (after applying statistical disclosure control methods).
+- **Data release:** this contains the [open data release](https://github.com/HFAnalyticsLab/NDL_Output3_Hospital_care_CEV/blob/main/Data%20release/Networked-Data-Lab-Hospital-use-for-the-CEV-population-GitHub.xlsx) with the summary statistics produced by all partners alongside a guide on how to interpret them.
 
 ### Requirements
 
