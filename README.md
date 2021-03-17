@@ -56,7 +56,7 @@ These scripts were written in R version 4.0.2 and RStudio Version 1.1.383.
 * Alisha Davies, Public Health Wales - [E-mail](Alisha.Davies@wales.nhs.uk) - [Twitter](https://twitter.com/AlishaDavies1)
 * Sara Sekelj, Imperial College Health Partners - [E-mail](Sara.Sekelj@imperialcollegehealthpartners.com) - [Twitter](https://twitter.com/sekeljsara)
 * Simon Chambers, Wirral University Teaching Hospital NHS Foundation Trust - [E-mail](Simon.Chambers@nhs.net)
-* Frank Wood, NHS Leeds CCG - [E-mail](Frank.Wood@leeds.gov.uk)
+* Frank Wood, NHS Leeds CCG and Leeds City Council - [E-mail](Frank.Wood@leeds.gov.uk)
 
 ## License
 
