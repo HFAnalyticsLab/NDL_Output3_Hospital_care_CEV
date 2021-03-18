@@ -69,7 +69,7 @@ table1.leeds <- plyr::rbind.fill(table1.overall.leeds,table1.age.leeds,table1.se
 rm(table1.overall.leeds,table1.age.leeds,table1.sex.leeds,table1.imd.leeds)
 table1.leeds$partner <- "Leeds"
 
-##### Remove all_admissions
+##### Rename elective admissions
 
 table1.leeds <- table1.leeds %>%
   mutate(.,breakdown.level=ifelse(breakdown.level=="admissions_elective","admissions_electives",breakdown.level))
