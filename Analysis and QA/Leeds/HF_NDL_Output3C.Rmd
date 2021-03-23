@@ -1,0 +1,702 @@
+---
+title: ""
+author: "AB"
+date: "22 March 2021"
+fontsize: 10pt
+output: 
+  html_document:
+    theme: "cerulean"
+    toc: FALSE
+---
+
+```{r setup, include=FALSE}
+
+library(kableExtra)
+library(knitr)
+library(tableone)
+library(tidyr)
+library(dplyr)
+library(skimr)
+library(lubridate)
+
+```
+
+## __Leeds HF Networked Data Lab__ {.tabset .tabset-fade .tabset-pills}
+### Output 3C
+
+***
+
+##### __Load__
+
+```{r load, eval=FALSE}
+O3C_type2 <- 
+  dplyr::bind_rows(O3C_IP3, O3C_OP3, O3C_AE3) %>% 
+  dplyr::distinct()
+
+O3C_type2 <- 
+  O3C_type2 %>%   
+  dplyr::mutate(sex = fct_explicit_na(factor(sex, levels = c("female", "male")), 
+                                      na_level = "unknown/other"),
+                age_group = fct_explicit_na(factor(age_group, levels = c("<30", "30-49", "50-69", "70+"))
+                                            , na_level = "unknown"),
+                deprivation = fct_explicit_na(factor(deprivation, levels = c("1", "2", "3", "4", "5")),
+                                              na_level = "unknown"),
+                type = fct_explicit_na(factor(type, levels = c("admissions_elective", 
+                                                               "admissions_emergency", 
+                                                               "admissions_other", 
+                                                               "AE_attendance", 
+                                                               "outpatient_attendance")),
+                                       na_level = "unknown")  
+                )
+
+# IMD from HF link
+# https://opendata.arcgis.com/datasets/d4b79be994ac4820ad44e10ded313df3_0.csv
+download.file(url = "https://opendata.arcgis.com/datasets/d4b79be994ac4820ad44e10ded313df3_0.csv",
+              destfile = "NDL_IMD_LSOA_2019.csv")
+
+IMD <- 
+  read.csv(file = "NDL_IMD_LSOA_2019.csv",
+           header = T,
+           stringsAsFactors = F) %>% 
+  dplyr::select(lsoa11cd, lsoa11nm, IMDDecil)
+
+# recode
+IMD2 <- 
+  IMD %>% dplyr::mutate(
+  IMDDecil = as.character(IMDDecil),  
+  IMDQuintil = case_when(
+    IMDDecil %in% 1:2 ~ "1",
+    IMDDecil %in% 3:4 ~ "2",
+    IMDDecil %in% 5:6 ~ "3",
+    IMDDecil %in% 7:8 ~ "4",
+    IMDDecil %in% 9:10 ~ "5",
+    is.na(IMDDecil) | IMDDecil == 0 ~ "Unknown",
+    TRUE ~ as.character(IMDDecil)
+  )
+)
+
+# rename
+IMD2 <- 
+  dplyr::rename(IMD2, LSOA = lsoa11cd, LSOA_nm = lsoa11nm, 
+                IMD_Decile = IMDDecil, IMD_Quintile = IMDQuintil)
+
+```
+
+***
+
+##### __Table 3-1 All__
+
+```{r t31, eval=FALSE}
+
+T3_1_Overall_all <- 
+  O3C_type2 %>% 
+  dplyr::select(Patient_ID, Spell_ID, admission_date, type) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month"),
+                type = fct_collapse(type, admissions_all = c("admissions_elective", 
+                                                             "admissions_emergency", 
+                                                             "admissions_other"))
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+# check type
+T3_1_Overall_type <- 
+  O3C_type2 %>% 
+  dplyr::distinct() %>%
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_1_Overall <- 
+  dplyr::bind_rows(T3_1_Overall_all, T3_1_Overall_type) %>% 
+  dplyr::arrange(type, desc(year), desc(month)) %>% 
+  dplyr::distinct()
+
+## Age
+T3_1_Age_all <- 
+  O3C_type2 %>% 
+  dplyr::select(Patient_ID, Spell_ID, admission_date, type, age_group) %>% 
+  dplyr::distinct() %>%
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month"),
+                type = fct_collapse(type, admissions_all = c("admissions_elective", 
+                                                             "admissions_emergency", 
+                                                             "admissions_other"))
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, age_group, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+# check type
+T3_1_Age_type <- 
+  O3C_type2 %>% 
+  dplyr::distinct() %>%
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, age_group, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_1_Age <- dplyr::bind_rows(T3_1_Age_all, T3_1_Age_type) %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(type, age_group, desc(year), desc(month))
+
+## Sex
+T3_1_Sex_all <- 
+  O3C_type2 %>% 
+  dplyr::select(Patient_ID, Spell_ID, admission_date, type, sex) %>% 
+  dplyr::distinct() %>%
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month"),
+                type = fct_collapse(type, admissions_all = c("admissions_elective", 
+                                                             "admissions_emergency", 
+                                                             "admissions_other"))
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, sex, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+# check type
+T3_1_Sex_type <- 
+  O3C_type2 %>% 
+  dplyr::distinct() %>%
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, sex, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_1_Sex <- 
+  dplyr::bind_rows(T3_1_Sex_all, T3_1_Sex_type) %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(type, sex, desc(year), desc(month))
+
+## Deprivation
+T3_1_Deprivation_all <- 
+  O3C_type2 %>% 
+  dplyr::select(Patient_ID, Spell_ID, admission_date, type, deprivation) %>% 
+  dplyr::distinct() %>%
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month"),
+                type = fct_collapse(type, admissions_all = c("admissions_elective", 
+                                                             "admissions_emergency", 
+                                                             "admissions_other"))
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, deprivation, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+# check type
+T3_1_Deprivation_type <- 
+  O3C_type2 %>% 
+  dplyr::distinct() %>%
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, deprivation, .drop = F) %>% 
+  dplyr::summarise(number.events = n_distinct(Spell_ID),
+                   number.patients = n_distinct(Patient_ID),
+                   total.patients = total_patients,
+                   pcnt_of_CEV = number.patients/total.patients*100) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_1_Deprivation <- 
+  dplyr::bind_rows(T3_1_Deprivation_all, T3_1_Deprivation_type) %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(type, deprivation, desc(year), desc(month))
+
+# statistical suppression
+T3_1_Overall2 <- T3_1_Overall %>% replace(., .>0 & .<5, NA) %>% dplyr::select(-pcnt_of_CEV)
+T3_1_Age2 <- T3_1_Age %>% replace(., .>0 & .<5, NA) %>% dplyr::select(-pcnt_of_CEV)
+T3_1_Sex2 <- T3_1_Sex %>% replace(., .>0 & .<5, NA) %>% dplyr::select(-pcnt_of_CEV)
+T3_1_Deprivation2 <- T3_1_Deprivation %>% replace(., .>0 & .<5, NA) %>% dplyr::select(-pcnt_of_CEV)
+```
+
+***
+
+##### __Table 3-2 All__
+
+```{r t32, eval=FALSE}
+# all episodes
+O3C_C19_all <- 
+  O3C_IP %>% 
+  dplyr::left_join(., IMD2, by = "LSOA") %>% 
+  dplyr::select(-IP_Patient_ID, -CEV_Snapshot_Date, -Ethnicity, -Frailty_Index, -Frailty_Level,
+                -Episode_Number, -Discharge_Date, -Spell_Report_Flag, -Discharge_Method_Code,
+                -Method_of_Admission_Code, -LSOA_nm, -IMD_Decile, -DoD, -POD_NHS_ESTABLISHMENT)
+
+O3C_C19_all <- 
+  O3C_C19_all %>% 
+  dplyr::mutate(Age = as.integer(Age),
+                type = "COVID19_admissions_any_diagnosis",
+                sex = dplyr::case_when(
+                  Sex == "M" ~ "male",
+                  Sex == "F" ~ "female",
+                  is.na(Sex) ~ NA_character_,
+                  TRUE ~ as.character(Sex)
+                ),
+                age_group = dplyr::case_when(
+                  Age < 30 ~ "<30",
+                  Age >= 30 & Age <= 49 ~ "30-49",
+                  Age >= 50 & Age <= 69 ~ "50-69",
+                  Age >= 70 ~ "70+",
+                  is.na(Age) ~ NA_character_,
+                  TRUE ~ as.character(Age)
+                ),
+                Admission_Date = as_date(Admission_Date)) %>% 
+  dplyr::select(-LSOA, -Sex)
+
+O3C_C19_all <- rename(O3C_C19_all, 
+                  deprivation = IMD_Quintile,
+                  admission_date = Admission_Date)
+
+# explicitly factor
+O3C_C19_all <- 
+  O3C_C19_all %>%   
+  dplyr::mutate(sex = fct_explicit_na(factor(sex, levels = c("female", "male")), 
+                                      na_level = "unknown/other"),
+                age_group = fct_explicit_na(factor(age_group, levels = c("<30", "30-49", "50-69", "70+"))
+                                            , na_level = "unknown"),
+                deprivation = fct_explicit_na(factor(deprivation, levels = c("1", "2", "3", "4", "5")),
+                                              na_level = "unknown")
+                )
+
+T3_2_Overall_C19all <- 
+  O3C_C19_all %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+                ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+# first episode
+O3C_C19_first <- 
+  O3C_IP %>% 
+  dplyr::left_join(., IMD2, by = "LSOA") %>% 
+  dplyr::select(-IP_Patient_ID, -CEV_Snapshot_Date, -Ethnicity, -Frailty_Index, -Frailty_Level,
+                -Discharge_Date, -Spell_Report_Flag, -Discharge_Method_Code,
+                -Method_of_Admission_Code, -LSOA_nm, -IMD_Decile, -DoD, -POD_NHS_ESTABLISHMENT) %>% 
+  dplyr::group_by(Spell_ID) %>% 
+  dplyr::top_n(., n = 1, wt = desc(Episode_Number)) %>%
+  dplyr::ungroup(Spell_ID) %>% 
+  dplyr::arrange(desc(Episode_Number)) %>% 
+  dplyr::select(-Episode_Number)
+
+O3C_C19_first <- 
+  O3C_C19_first %>% 
+  dplyr::mutate(Age = as.integer(Age),
+                type = "COVID19_admissions_first_episode",
+                sex = dplyr::case_when(
+                  Sex == "M" ~ "male",
+                  Sex == "F" ~ "female",
+                  is.na(Sex) ~ NA_character_,
+                  TRUE ~ as.character(Sex)
+                ),
+                age_group = dplyr::case_when(
+                  Age < 30 ~ "<30",
+                  Age >= 30 & Age <= 49 ~ "30-49",
+                  Age >= 50 & Age <= 69 ~ "50-69",
+                  Age >= 70 ~ "70+",
+                  is.na(Age) ~ NA_character_,
+                  TRUE ~ as.character(Age)
+                ),
+                Admission_Date = as_date(Admission_Date)) %>% 
+  dplyr::select(-LSOA, -Sex)
+
+O3C_C19_first <- dplyr::rename(O3C_C19_first, 
+                        deprivation = IMD_Quintile,
+                        admission_date = Admission_Date)
+
+# explicitly factor
+O3C_C19_first <- 
+  O3C_C19_first %>%   
+  dplyr::mutate(sex = fct_explicit_na(factor(sex, levels = c("female", "male")), 
+                                      na_level = "unknown/other"),
+                age_group = fct_explicit_na(factor(age_group, levels = c("<30", "30-49", "50-69", "70+"))
+                                            , na_level = "unknown"),
+                deprivation = fct_explicit_na(factor(deprivation, levels = c("1", "2", "3", "4", "5")),
+                                              na_level = "unknown")
+  )
+
+T3_2_Overall_C19first <- 
+  O3C_C19_first %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+                ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_2_Overall <- 
+  dplyr::bind_rows(T3_2_Overall_C19all, T3_2_Overall_C19first) %>% 
+  dplyr::filter(!is.na(year))
+
+# Age
+# all diagnosis
+T3_2_Age_C19all <- 
+  O3C_C19_all %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type, age_group) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, age_group, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, age_group, desc(year), desc(month))
+
+# first episode
+T3_2_Age_C19first <- 
+  O3C_C19_first %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type, age_group) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, age_group, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, age_group, desc(year), desc(month))
+
+T3_2_Age <- 
+  dplyr::bind_rows(T3_2_Age_C19all, T3_2_Age_C19first) %>% 
+  dplyr::filter(!is.na(year))
+
+# Sex
+# all diagnosis
+T3_2_Sex_C19all <- 
+  O3C_C19_all %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type, sex) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, sex, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, sex, desc(year), desc(month))
+
+# first episode
+T3_2_Sex_C19first <- 
+  O3C_C19_first %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type, sex) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, sex, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, sex, desc(year), desc(month))
+
+T3_2_Sex <- 
+  dplyr::bind_rows(T3_2_Sex_C19all, T3_2_Sex_C19first) %>% 
+  dplyr::filter(!is.na(year))
+
+# Deprivation
+# all diagnosis
+T3_2_Deprivation_C19all <- 
+  O3C_C19_all %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type, deprivation) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, deprivation, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, deprivation, desc(year), desc(month))
+
+# first episode
+T3_2_Deprivation_C19first <- 
+  O3C_C19_first %>% 
+  dplyr::filter_at(., vars(contains("Diagnosis")), any_vars(str_detect(., "U07[:digit:]"))) %>%
+  dplyr::filter(admission_date >= ymd("2020-03-01") & admission_date <= ymd("2020-07-31")) %>% 
+  dplyr::select(Patient_ID, admission_date, type, deprivation) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(month = month(admission_date, label = T),
+                year = year(admission_date),
+                time_start = floor_date(admission_date, "month"),
+                time_end = ceiling_date(admission_date, "month")
+  ) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, deprivation, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, deprivation, desc(year), desc(month))
+
+T3_2_Deprivation <- 
+  dplyr::bind_rows(T3_2_Deprivation_C19all, T3_2_Deprivation_C19first) %>% 
+  dplyr::filter(!is.na(year))
+
+# statistical suppression
+T3_2_Overall2 <- T3_2_Overall %>% replace(., .>0 & .<5, NA)
+T3_2_Age2 <- T3_2_Age %>% replace(., .>0 & .<5, NA)
+T3_2_Sex2 <- T3_2_Sex %>% replace(., .>0 & .<5, NA)
+T3_2_Deprivation2 <- T3_2_Deprivation %>% replace(., .>0 & .<5, NA)
+
+```
+
+***
+
+##### __Table 3-3__
+
+```{r t33, eval=FALSE}
+
+O3C_CEV2 <- 
+  O3C_CEV %>%   
+  dplyr::left_join(., IMD2, by = "LSOA") %>% 
+  dplyr::select(-DMIC_SnapshotDate, -Ethnicity, -Frailty_Index, -Frailty_Level, -LSOA, -LSOA_nm, -IMD_Decile)
+  
+O3C_CEV2 <- rename(O3C_CEV2, 
+       Patient_ID = NHSNumber_PSEUDO,
+       Age = DMIC_AgeAt20200301)
+
+O3C_CEV3 <- 
+  O3C_CEV2 %>% 
+  dplyr::mutate(Age = as.integer(Age),
+                DoD = as_date(DoD),
+                type = case_when(
+                  !is.na(DoD) & POD_NHS_ESTABLISHMENT == "1" ~ "deaths_anycause_hospital",
+                  !is.na(DoD) & POD_NHS_ESTABLISHMENT == "2" ~ "deaths_anycause_anywhere",
+                  !is.na(DoD) ~ "deaths_anycause_anywhere",
+                ),
+                sex = dplyr::case_when(
+                  Sex == "M" ~ "male",
+                  Sex == "F" ~ "female",
+                  is.na(Sex) ~ NA_character_,
+                  TRUE ~ as.character(Sex)
+                ),
+                age_group = dplyr::case_when(
+                  Age < 30 ~ "<30",
+                  Age >= 30 & Age <= 49 ~ "30-49",
+                  Age >= 50 & Age <= 69 ~ "50-69",
+                  Age >= 70 ~ "70+",
+                  is.na(Age) ~ NA_character_,
+                  TRUE ~ as.character(Age)
+                )) %>% 
+  dplyr::select(-Sex, -POD_NHS_ESTABLISHMENT)
+
+O3C_CEV3 <- dplyr::rename(O3C_CEV3, deprivation = IMD_Quintile)
+
+# explicitly factor
+O3C_CEV3 <- 
+  O3C_CEV3 %>%   
+  dplyr::mutate(sex = fct_explicit_na(factor(sex, levels = c("female", "male")), 
+                                      na_level = "unknown/other"),
+                age_group = fct_explicit_na(factor(age_group, levels = c("<30", "30-49", "50-69", "70+"))
+                                            , na_level = "unknown"),
+                deprivation = fct_explicit_na(factor(deprivation, levels = c("1", "2", "3", "4", "5")),
+                                              na_level = "unknown")
+  )
+
+# overall
+T3_3_Overall_type <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD, type) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>% 
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month)) %>% 
+  dplyr::filter(type == "deaths_anycause_hospital")
+
+T3_3_Overall_all <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>%
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month"),
+                type = "deaths_anycause_anywhere") %>% 
+  dplyr::group_by(month, year, time_start, time_end, type) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_3_Overall <- 
+  dplyr::bind_rows(T3_3_Overall_all, T3_3_Overall_type)
+
+# Age
+T3_3_Age_type <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD, type, age_group) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>% 
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, age_group, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month)) %>% 
+  dplyr::filter(type == "deaths_anycause_hospital")
+
+T3_3_Age_all <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD, age_group) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>%
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month"),
+                type = "deaths_anycause_anywhere") %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, age_group, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_3_Age <- 
+  dplyr::bind_rows(T3_3_Age_all, T3_3_Age_type) %>% 
+  dplyr::arrange(type, age_group, desc(year), desc(month)) %>% 
+  dplyr::filter(!is.na(year))
+
+# Sex
+T3_3_Sex_type <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD, type, sex) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>% 
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, sex, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month)) %>% 
+  dplyr::filter(type == "deaths_anycause_hospital")
+
+T3_3_Sex_all <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD, sex) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>%
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month"),
+                type = "deaths_anycause_anywhere") %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, sex, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_3_Sex <- 
+  dplyr::bind_rows(T3_3_Sex_all, T3_3_Sex_type) %>% 
+  dplyr::arrange(type, sex, desc(year), desc(month)) %>% 
+  dplyr::filter(!is.na(year))
+
+# Deprivation
+T3_3_Deprivation_type <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD, type, deprivation) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>% 
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month")) %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, deprivation, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month)) %>% 
+  dplyr::filter(type == "deaths_anycause_hospital")
+
+T3_3_Deprivation_all <- 
+  O3C_CEV3 %>% 
+  dplyr::select(Patient_ID, DoD, deprivation) %>% 
+  dplyr::distinct() %>% 
+  dplyr::filter(DoD >= as_date("2020-03-01") & DoD <= as_date("2020-07-31")) %>%
+  dplyr::mutate(month = month(DoD, label = T),
+                year = year(DoD),
+                time_start = floor_date(DoD, "month"),
+                time_end = ceiling_date(DoD, "month"),
+                type = "deaths_anycause_anywhere") %>% 
+  dplyr::group_by(month, year, time_start, time_end, type, deprivation, .drop = F) %>% 
+  dplyr::summarise(number.patients = n_distinct(Patient_ID)) %>% 
+  dplyr::arrange(type, desc(year), desc(month))
+
+T3_3_Deprivation <- 
+  dplyr::bind_rows(T3_3_Deprivation_all, T3_3_Deprivation_type) %>% 
+  dplyr::arrange(type, deprivation, desc(year), desc(month)) %>% 
+  dplyr::filter(!is.na(year))
+
+# statistical suppression
+T3_3_Overall2 <- T3_3_Overall %>% replace(., .>0 & .<5, NA)
+T3_3_Age2 <- T3_3_Age %>% replace(., .>0 & .<5, NA)
+T3_3_Sex2 <- T3_3_Sex %>% replace(., .>0 & .<5, NA)
+T3_3_Deprivation2 <- T3_3_Deprivation %>% replace(., .>0 & .<5, NA)
+
+```
+
+***

@@ -6,6 +6,9 @@
 /Visualize data/
 /Visualize data/*.*
 
+#Open data cover page
+/Data release/cover-page.xlsx
+
 # Object file
 *.o
 

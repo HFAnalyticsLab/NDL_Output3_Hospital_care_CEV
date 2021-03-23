@@ -8,8 +8,8 @@
 
 #Load packages
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(dplyr,stringr,sp,ggplot2,plyr,readODS,
-               gmodels,DescTools,data.table,
+pacman::p_load(dplyr,stringr,sp,ggplot2,
+               gmodels,data.table,
                tibble,pbapply,pbmcapply,here,
                tidyverse,readxl)
 
@@ -179,36 +179,36 @@ table3 <- table3 %>%
 
 #Compute time-varying denominator (from 2018)
 
-skeleton_months <- table1 %>%
-  filter(.,breakdown=="overall",strata=="overall",breakdown.level=="admissions_all") %>%
-  select(.,partner,breakdown,year_month)
-
-detach(package:plyr)
-total.patients.rem <- table3 %>%
-  filter(.,breakdown=="overall",location=="anywhere") %>%
-  select(.,partner,breakdown,breakdown.level,year_month,year_month_day,cumdeaths,total.patients) %>%
-  arrange(.,partner,breakdown,breakdown.level,year_month_day) %>%
-  group_by(partner) %>%
-  mutate(cumdeaths_lm = lag(cumdeaths, order_by=partner)) %>%
-  mutate(cumdeaths_lm = ifelse(is.na(cumdeaths_lm),0,cumdeaths_lm)) %>%
-  mutate(total.patients.rem=(total.patients-cumdeaths_lm)) %>%
-  select(.,partner,breakdown,year_month,total.patients.rem) %>%
-  left_join(skeleton_months,.,by=c("partner","breakdown","year_month")) %>%
-  arrange(.,partner,breakdown,desc(year_month))
-
-rm(skeleton_months)
-total.patients.rem <- total.patients.rem %>%
-  group_by(partner) %>%
-  fill(total.patients.rem) %>%
-  arrange(partner,breakdown,year_month) %>%
-  ungroup()
-
-#Merge time-varying total into other tables
-
-table1 <- left_join(table1,total.patients.rem,by=c("partner","breakdown","year_month"))
-table2 <- left_join(table2,total.patients.rem,by=c("partner","breakdown","year_month"))
-table3 <- left_join(table3,total.patients.rem,by=c("partner","breakdown","year_month"))
-rm(total.patients.rem)
+# skeleton_months <- table1 %>%
+#   filter(.,breakdown=="overall",strata=="overall",breakdown.level=="admissions_all") %>%
+#   select(.,partner,breakdown,year_month)
+# 
+# detach(package:plyr)
+# total.patients.rem <- table3 %>%
+#   filter(.,breakdown=="overall",location=="anywhere") %>%
+#   select(.,partner,breakdown,breakdown.level,year_month,year_month_day,cumdeaths,total.patients) %>%
+#   arrange(.,partner,breakdown,breakdown.level,year_month_day) %>%
+#   group_by(partner) %>%
+#   mutate(cumdeaths_lm = lag(cumdeaths, order_by=partner)) %>%
+#   mutate(cumdeaths_lm = ifelse(is.na(cumdeaths_lm),0,cumdeaths_lm)) %>%
+#   mutate(total.patients.rem=(total.patients-cumdeaths_lm)) %>%
+#   select(.,partner,breakdown,year_month,total.patients.rem) %>%
+#   left_join(skeleton_months,.,by=c("partner","breakdown","year_month")) %>%
+#   arrange(.,partner,breakdown,desc(year_month))
+# 
+# rm(skeleton_months)
+# total.patients.rem <- total.patients.rem %>%
+#   group_by(partner) %>%
+#   fill(total.patients.rem) %>%
+#   arrange(partner,breakdown,year_month) %>%
+#   ungroup()
+# 
+# #Merge time-varying total into other tables
+# 
+# table1 <- left_join(table1,total.patients.rem,by=c("partner","breakdown","year_month"))
+# table2 <- left_join(table2,total.patients.rem,by=c("partner","breakdown","year_month"))
+# table3 <- left_join(table3,total.patients.rem,by=c("partner","breakdown","year_month"))
+# rm(total.patients.rem)
 
 ###########################################################################
 ##################### Rolling difference in activity  #####################
@@ -247,14 +247,11 @@ table1 <- left_join(table1,table2.covid,by=c("year_month","partner","breakdown",
 #Table 1
 table1 <- table1 %>%
   mutate(.,pct.people=(number.patients.sdc/total.patients)*100,
-         pct.people.adj=(number.patients.sdc/total.patients.rem)*100,
-         cases.per.100=(number.events.sdc/total.patients)*100,
-         cases.per.100.adj=(number.events.sdc/total.patients.rem)*100)
+         cases.per.100=(number.events.sdc/total.patients)*100)
 
 #Table 2
 table2 <- table2 %>%
-  mutate(.,pct.people=(number.patients.sdc/total.patients)*100,
-         pct.people.adj=(number.patients.sdc/total.patients.rem)*100)
+  mutate(.,pct.people=(number.patients.sdc/total.patients)*100)
 
 #########################################################
 ##################### Save results  #####################
