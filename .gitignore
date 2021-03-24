@@ -6,6 +6,11 @@
 /Visualize data/
 /Visualize data/*.*
 
+#ICD-10 function
+/Analysis and QA/Supplementary table/custom-icd-10-function-test.R
+/Analysis and QA/Supplementary table/ICD-10 codes/
+/Analysis and QA/Supplementary table/ICD-10 codes/*.*
+
 #Open data cover page
 /Data release/cover-page.xlsx
 
