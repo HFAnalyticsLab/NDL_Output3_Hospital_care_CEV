@@ -33,15 +33,16 @@ ICD10_chapter_names <- c("1 - Certain infectious and parasitic diseases",
 "19 - Injury, poisoning and certain other consequences of external causes",
 "20 - External causes of morbidity",
 "21 - Factors influencing health status and contact with health services",
-"22 - COVID-19")
+"22 - Codes for special purposes")
 
 ### Assign names to list
 names(ICD10_chapter_codes) <- ICD10_chapter_names
 
 ### Assign ICD-10 code prefixes to list
+### Source: https://icd.who.int/browse10/2019/en#/I (simplified version below where chapter span whole letters)
 ICD10_chapter_codes[[1]] <- c(paste0("A",sprintf("%02d", 0:99)),
                               paste0("B",sprintf("%02d", 0:99)))
-ICD10_chapter_codes[[2]] <- c(paste0("C",sprintf("%02d", 0:99)),
+ICD10_chapter_codes[[2]] <- c(paste0("C",sprintf("%02d", 0:97)),
                               paste0("D",sprintf("%02d", 0:49)),
                               "C7A","C7B","C4A","D3A")
 ICD10_chapter_codes[[3]] <- paste0("D",sprintf("%02d", 50:89))
@@ -58,7 +59,7 @@ ICD10_chapter_codes[[13]] <- c(paste0("M",sprintf("%02d", 0:99))
                                ,"M1A")
 ICD10_chapter_codes[[14]] <- paste0("N",sprintf("%02d", 0:99))
 ICD10_chapter_codes[[15]] <- c(paste0("O",sprintf("%02d", 0:99)),
-                                    "O9A")
+                               "O9A")
 ICD10_chapter_codes[[16]] <- paste0("P",sprintf("%02d", 0:96))
 ICD10_chapter_codes[[17]] <- paste0("Q",sprintf("%02d", 0:99))
 ICD10_chapter_codes[[18]] <- paste0("R",sprintf("%02d", 0:99))
@@ -69,8 +70,9 @@ ICD10_chapter_codes[[20]] <- c(paste0("V",sprintf("%02d", 0:99)),
                                paste0("X",sprintf("%02d", 0:99)),
                                paste0("Y",sprintf("%02d", 0:99)))
 ICD10_chapter_codes[[21]] <- c(paste0("Z",sprintf("%02d", 0:99)),
-                                    "Z3A")
-ICD10_chapter_codes[[22]] <- c("U071","U072")
+                               "Z3A")
+ICD10_chapter_codes[[22]] <- c(paste0("U",sprintf("%02d", 0:49)),
+                               paste0("U",sprintf("%02d", 82:85)))
 
 ### Function that returns ICD-10 chapter
 
@@ -88,7 +90,7 @@ icd10_to_chapter <- function(inputcode){
   #Starting with COVID codes, which are a special case because it is based on four characters
   
   if(inputcode_nopunct %in% c("U071","U072")){
-    chapter_result <- "22 - COVID-19"
+    chapter_result <- "22 - Codes for special purposes"
   } else{
     
   #If there is no match with either COVID codes, look for matches among the 21 ICD-10 chapters
