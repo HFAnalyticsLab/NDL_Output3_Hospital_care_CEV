@@ -1,0 +1,522 @@
+---
+title: "Networked Data Lab, hospital use among CEV people during COVID-19"
+author: "Sebastien Peytrignet"
+date: "4/14/2021"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+    toc: TRUE
+---
+
+```{r setup.A, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#Load packages
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(dplyr,stringr,sp,ggplot2,readODS,
+               gmodels,data.table,tibble,tidyverse,
+               readxl,plotly,hrbrthemes,RColorBrewer,
+               knitr,kableExtra)
+
+rm(list = ls())
+
+#Directories
+rawdatadir <- "M:/Analytics/Networked Data Lab/Partner outputs/Output 3 HC usage/"
+gitdir <- "M:/Analytics/Sebastien/GitHub/NDL_Output3_Hospital_care_CEV/"
+```
+
+## Reading in data
+
+```{r setup.B, echo=TRUE}
+
+#Auxiliary data
+
+#Ranking of types of service
+bl.orders <- data.frame(order=1:4,breakdown.level=c("outpatient_attendance","AE_attendance","admissions_electives","admissions_emergency"))
+
+#Order of months
+month.lookup <- data.frame(month.number=c("01","02","03","04","05","06","07","08","09","10","11","12"),month.abbr=month.abb,month.full=month.name)
+
+#Files directory
+setwd(gitdir)
+
+#Load partner data
+
+#Service use statistics (removing A&E and outpatient in Wales)
+table1.all.partners <- fread("Visualize data/Data/table1.all.partners.csv",
+                             header=TRUE, sep=",", check.names=T) %>%
+  left_join(.,bl.orders,by="breakdown.level") %>%
+  mutate(.,year=word(year_month, 1, sep = fixed('-')),month=word(year_month, 2, sep = fixed('-'))) %>%
+  left_join(.,month.lookup,by=c("month"="month.number")) %>%
+  mutate(.,date_text=paste(month.full,year,sep=" "),
+         year_month_day=paste(year_month,"01",sep="-")) %>%
+  filter(.,!(breakdown.level %in% c("admissions_other")))
+
+#COVID admissions
+table2.all.partners <- fread("Visualize data/Data/table2.all.partners.csv",
+                             header=TRUE, sep=",", check.names=T)
+
+#Deaths
+table3.all.partners <- fread("Visualize data/Data/table3.all.partners.csv",
+                             header=TRUE, sep=",", check.names=T)
+
+#Changes in service use data
+#This step creates a new column for each row of data (activity levels one year ago)
+#and computes the absolute and relative difference
+
+table1.all.partners.pcts <-  table1.all.partners %>%
+  filter(., !(strata %in% c("unknown","unknown/other"))) %>%
+  select(.,partner,year_month,year_month_day,strata,breakdown,breakdown.level,
+         number.events.sdc,total.patients,year,month,date_text) %>%
+  mutate(.,year_month_day=lubridate::ymd(year_month_day),
+         year_l1=(as.numeric(year)-1)) %>%
+  mutate(.,year_month_day_l1=lubridate::ymd(paste(year_l1,month,"01",sep="-")),
+         keyone=paste(partner,breakdown,strata,breakdown.level,sep="-"))
+
+#Lags data
+table1.all.partners.pcts.l1 <- table1.all.partners.pcts %>%
+  select(.,keyone,year_month_day,number.events.sdc) %>%
+  dplyr::rename(.,number.events.sdc_l1=number.events.sdc,
+                year_month_day_l1=year_month_day)
+
+#Merged back into main data
+table1.all.partners.pcts <- left_join(table1.all.partners.pcts,
+                                      table1.all.partners.pcts.l1,
+                                      by=c("keyone","year_month_day_l1")) %>%
+  select(.,-c("keyone","year_l1")) %>%
+  mutate(.,pct_change_20to19=(number.events.sdc-number.events.sdc_l1)/number.events.sdc_l1*100,
+         abs_change_12m=(number.events.sdc-number.events.sdc_l1)) %>%
+  filter(.,year_month>="2019-07") %>%
+  mutate(.,year_month_day=lubridate::ymd(year_month_day)) %>%
+  arrange(.,partner,breakdown,strata,breakdown.level,year_month)
+rm(table1.all.partners.pcts.l1)
+
+#Function to clean column names
+clean_colnames <- function(dataset){
+  names(dataset) <- str_replace_all(names(dataset),"\\.","_")
+  return(dataset)
+}
+```
+
+## Levels in January 2020
+
+### Pooled
+
+```{r jan.level.pooled, echo=TRUE, message=FALSE, warning=FALSE}
+pooled.level.jan <- table1.all.partners %>% 
+  filter(.,strata=="overall",year_month=="2020-01",
+         breakdown.level!="admissions_all") %>%
+  select(.,breakdown.level,partner,year_month,number.events.sdc,total.patients) %>%
+  arrange(.,breakdown.level,partner) %>%
+  group_by(breakdown.level) %>%
+  summarise(number.events.sdc=sum(number.events.sdc,na.rm=TRUE),
+            total.patients=sum(total.patients,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,cases.per.100=(number.events.sdc/total.patients)*100) %>%
+  clean_colnames(.)
+
+pooled.level.jan %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+```
+
+### By partner
+
+```{r jan.level.partners, echo=TRUE, message=FALSE, warning=FALSE}
+partners.jan.levels <- table1.all.partners %>% 
+  filter(.,strata=="overall",year_month=="2020-01",
+         breakdown.level!="admissions_all") %>%
+  select(.,breakdown.level,partner,year_month,number.events.sdc,total.patients) %>%
+  group_by(breakdown.level,partner) %>%
+  summarise(number.events.sdc=sum(number.events.sdc,na.rm=TRUE),
+            total.patients=sum(total.patients,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,cases.per.100=(number.events.sdc/total.patients)*100) %>%
+  arrange(.,breakdown.level,cases.per.100) %>%
+  clean_colnames(.)
+
+partners.jan.levels %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+```
+
+## % reduction in activity in April 2020 vs. April 2019 (elective admissions, A&E and outpatient)
+
+### Pooled
+
+```{r apr.pct.change.pooled, echo=TRUE, message=FALSE, warning=FALSE}
+
+pooled.drop.april <- table1.all.partners.pcts %>% 
+  filter(.,strata=="overall",year_month=="2020-04",
+         breakdown.level!="admissions_emergency",
+         breakdown.level!="admissions_all") %>%
+  select(.,breakdown.level,partner,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.drop.april %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+```
+
+### By partner
+
+```{r apr.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
+
+drop.april <- table1.all.partners.pcts %>%
+  filter(.,strata=="overall",year_month=="2020-04",
+         breakdown.level!="admissions_emergency",
+         breakdown.level!="admissions_all") %>%
+  select(.,breakdown.level,partner,year_month,
+         number.events.sdc_l1,number.events.sdc,abs_change_12m) %>%
+  group_by(breakdown.level,partner) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,partner,abs_change_12m,pct_change) %>%
+  arrange(.,breakdown.level,desc(pct_change)) %>%
+  clean_colnames(.)
+
+drop.april %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F, font_size= 8)
+```
+
+## % reduction in activity in April 2020 vs. April 2019 (emergency admissions)
+
+### Pooled (excl. Grampian)
+
+```{r emergency.pct.change.pooled, echo=TRUE, message=FALSE, warning=FALSE}
+
+pooled.drop.april.ea <- table1.all.partners.pcts %>%
+  filter(.,strata=="overall",year_month=="2020-04",
+           breakdown.level %in% c("admissions_emergency"),
+           partner!="Grampian") %>%
+  select(.,breakdown.level,partner,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.drop.april.ea %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+```
+
+### By partner
+
+```{r elective.apr.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
+
+drop.april.ea <- table1.all.partners.pcts %>% filter(.,strata=="overall",
+                            year_month=="2020-04",
+                            breakdown.level %in% c("admissions_emergency")) %>%
+  select(.,breakdown.level,partner,year_month,
+         number.events.sdc_l1,number.events.sdc,abs_change_12m) %>%
+  group_by(breakdown.level,partner) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,partner,abs_change_12m,pct_change) %>%
+  arrange(.,breakdown.level,desc(pct_change)) %>%
+  clean_colnames(.)
+
+drop.april.ea %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F, font_size= 8)
+```
+
+## Jan 2020 to April 2020 % change in Grampian
+
+```{r grampian.pct.change, echo=TRUE, message=FALSE, warning=FALSE}
+
+grampian.emergency <- table1.all.partners.pcts %>%
+  filter(.,strata=="overall", partner=="Grampian",
+       breakdown.level %in% c("admissions_emergency"))
+
+before <- filter(grampian.emergency,year_month=="2020-01")$number.events.sdc
+after <- filter(grampian.emergency,year_month=="2020-04")$number.events.sdc
+pct_change <- round((after-before)/before*100,1)
+
+pct_change
+```
+
+<!-- ## Change in absolute numbers March-July (2020 compared to 2019, excl. Leeds and Wales) -->
+
+<!-- ```{r march.july.change, echo=TRUE, message=FALSE, warning=FALSE} -->
+
+<!-- table.abs.changes <- table1.all.partners.pcts %>% -->
+<!--   filter(.,strata=="overall",year_month>="2020-03", -->
+<!--          partner!="Leeds",partner!="Wales") %>% -->
+<!--   select(.,partner,year_month,breakdown.level,abs_change_12m) %>% -->
+<!--   arrange(.,partner,breakdown.level,year_month) %>% -->
+<!--   group_by(breakdown.level) %>% -->
+<!--   summarise(abs_change_12m=sum(abs_change_12m)) %>% -->
+<!--   ungroup() %>% -->
+<!--   clean_colnames(.) -->
+
+<!-- total.patients <- filter(table1.all.partners,strata=="overall", -->
+<!--                          year_month>="2020-07",partner!="Leeds",partner!="Wales", -->
+<!--                          breakdown.level=="admissions_all") %>% -->
+<!--   select(.,total.patients) %>% -->
+<!--   sum(.) -->
+<!-- table.abs.changes$total_patients <- total.patients -->
+
+<!-- table.abs.changes %>% -->
+<!--   kable(.,digits=1,format.args = list(big.mark = ",")) %>% -->
+<!--   kable_styling(., full_width = F) -->
+<!-- ``` -->
+
+## % reduction in activity in April 2020 vs. April 2019, by age group and type of healthcare
+
+### Pooled (elective admissions, A&E and outpatient attendances)
+
+```{r apr.drop.by.age.pooled, echo=TRUE, message=FALSE, warning=FALSE}
+pooled.drop.april.by.age <- table1.all.partners.pcts %>% filter(.,
+                            breakdown=="age",
+                            breakdown.level!="admissions_emergency",
+                            breakdown.level!="admissions_all",
+                            year_month=="2020-04",
+                            strata %in% c("0-29","70+")) %>%
+  select(.,partner,strata,breakdown.level,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level,strata) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,strata,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.drop.april.by.age %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
+```
+
+### Pooled (emergency admissions, incl. Grampian)
+
+```{r apr.drop.by.age.pooled.ea, echo=TRUE, message=FALSE, warning=FALSE}
+pooled.drop.april.by.age.ea <- table1.all.partners.pcts %>%
+  filter(.,breakdown=="age",
+         year_month=="2020-04",
+         breakdown.level %in% c("admissions_emergency"),
+         strata %in% c("0-29","70+")) %>%
+  select(.,partner,strata,breakdown.level,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(breakdown.level,strata) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,strata,abs_change_12m,pct_change) %>%
+  clean_colnames(.)
+
+pooled.drop.april.by.age.ea %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
+```
+
+### By partner
+
+```{r apr.drop.by.age, echo=TRUE, message=FALSE, warning=FALSE}
+drop.april.by.age <- table1.all.partners.pcts %>%
+  filter(.,breakdown=="age",year_month=="2020-04",
+    breakdown.level %in% c("admissions_electives","outpatient_attendance",
+                           "admissions_emergency","AE_attendance"),
+                            strata %in% c("0-29","70+")) %>%
+  select(.,partner,strata,breakdown.level,year_month,
+         number.events.sdc_l1,number.events.sdc,
+         abs_change_12m) %>%
+  group_by(partner,breakdown.level,strata) %>%
+  summarise(.,number.events.sdc_l1=sum(number.events.sdc_l1,na.rm=TRUE),
+            abs_change_12m=sum(abs_change_12m,na.rm=TRUE)) %>%
+  ungroup() %>%
+  mutate(.,pct_change=abs_change_12m/number.events.sdc_l1*100) %>%
+  select(.,breakdown.level,strata,partner,abs_change_12m,pct_change) %>%
+  arrange(.,breakdown.level,strata,desc(pct_change),) %>%
+  clean_colnames(.)
+
+drop.april.by.age %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(.,bootstrap_options = c("striped", "hover"),full_width = F, font_size= 8)
+```
+
+
+<!-- ## Change in absolute numbers by age group (March to July 2020, compared to same period in 2019), excl. Leeds and Wales -->
+
+<!-- ```{r march.july.age.change, echo=TRUE, message=FALSE, warning=FALSE} -->
+
+<!-- absolute_reduction_over_70 <- filter(table1.all.partners.pcts,breakdown=="age", -->
+<!--                                      breakdown.level %in% c("outpatient_attendance","admissions_electives"), -->
+<!--                                      strata %in% c("0-29","70+"), -->
+<!--                                      year_month>="2020-03", -->
+<!--                                      partner!="Leeds",partner!="Wales") %>% -->
+<!--   select(.,breakdown.level,partner,year_month,strata,total.patients,abs_change_12m) %>% -->
+<!--   group_by(breakdown.level,strata) %>% -->
+<!--   summarise(abs_difference=sum(abs_change_12m)) %>% -->
+<!--   ungroup() %>% -->
+<!--   clean_colnames(.) -->
+
+<!-- absolute_reduction_over_70 %>% -->
+<!--   kable(.,digits=1,format.args = list(big.mark = ",")) %>% -->
+<!--   kable_styling(., full_width = F) -->
+
+<!-- ``` -->
+
+<!-- ## Number of CEV people by age group (excl. Leeds and Wales) -->
+
+<!-- ```{r cohort.size.age, echo=TRUE, message=FALSE, warning=FALSE} -->
+<!-- NDL_CEV_size <- filter(table1.all.partners,breakdown=="age",strata!="unknown", -->
+<!--                        breakdown.level %in% c("admissions_all"), -->
+<!--                        year_month=="2018-03",partner!="Leeds",partner!="Wales") %>% -->
+<!--   select(.,partner,breakdown.level,strata,total.patients) %>% -->
+<!--   group_by(.,breakdown.level,strata) %>% -->
+<!--   summarise(total.patients=sum(total.patients)) %>% -->
+<!--   ungroup() %>% -->
+<!--   clean_colnames(.) -->
+
+<!-- NDL_CEV_size %>% -->
+<!--   kable(.,digits=1,format.args = list(big.mark = ",")) %>% -->
+<!--   kable_styling(., full_width = F) -->
+<!-- ``` -->
+
+## % of admissions that were COVID-related
+
+### Pooled
+
+```{r pct.covid.pooled, echo=TRUE, message=FALSE, warning=FALSE}
+
+covid.adm.data <- table1.all.partners %>%
+  filter(.,strata=="overall",breakdown.level=="admissions_all",
+    year_month>="2020-03") %>%
+  select(.,breakdown.level,partner,year_month,number.patients.sdc,
+         number.patients.covid,total.patients)
+
+#Rate of admitted patients who 'had COVID' (pooled)
+pooled.covid  <- covid.adm.data %>%
+  summarise(across(c("number.patients.sdc", "number.patients.covid"), ~ sum(.x, na.rm = TRUE))) %>%
+  mutate(.,rate_adm_covid=number.patients.covid/number.patients.sdc*100) %>%
+  clean_colnames(.)
+
+pooled.covid %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+
+```
+
+### By partner
+
+```{r pct.covid.partners, echo=TRUE, message=FALSE, warning=FALSE}
+
+covid.adm.data <- table1.all.partners %>%
+  filter(.,strata=="overall",breakdown.level=="admissions_all",
+    year_month>="2020-03") %>%
+  select(.,breakdown.level,partner,year_month,number.patients.sdc,
+         number.patients.covid,total.patients)
+
+#Rate of admitted patients who 'had COVID' (unpooled)
+allp.covid <- covid.adm.data %>%
+  group_by(partner) %>%
+  summarise(across(c("number.patients.sdc", "number.patients.covid"), ~ sum(.x, na.rm = TRUE))) %>%
+  mutate(.,rate_adm_covid=number.patients.covid/number.patients.sdc*100) %>%
+  ungroup() %>%
+  arrange(.,rate_adm_covid) %>%
+  clean_colnames(.)
+
+allp.covid %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+
+```
+
+## Total number of patients with COVID
+
+```{r total.covid, echo=TRUE, message=FALSE, warning=FALSE}
+
+total.covid.patients <- table1.all.partners %>% filter(.,strata=="overall",
+                         breakdown.level=="admissions_all",
+                         year_month>="2020-03") %>%
+  select(.,breakdown.level,partner,year_month,number.patients.sdc,
+         number.patients.covid,total.patients) %>%
+  group_by(breakdown.level) %>%
+  summarise(.,number.patients.covid=sum(number.patients.covid,na.rm=TRUE)) %>%
+  ungroup() %>%
+  clean_colnames(.)
+
+total.covid.patients %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+
+```
+
+## Total number of deaths
+
+```{r total.deaths, echo=TRUE, message=FALSE, warning=FALSE}
+
+total.deaths <- table3.all.partners %>%
+  filter(.,location=="anywhere",breakdown.level=="overall") %>%
+  select(.,number.patients.sdc) %>%
+  summarise(total.deaths=sum(number.patients.sdc,na.rm=TRUE)) %>%
+  clean_colnames(.)
+
+total.deaths %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+
+```
+
+## Cumulative mortality rate
+
+### Pooled
+
+```{r pooled.cum.deaths, echo=TRUE, message=FALSE, warning=FALSE}
+
+total.deaths.cum.pooled <- table3.all.partners %>%
+  filter(.,location=="anywhere",breakdown.level=="overall") %>%
+  select(.,location,year_month,partner,number.patients.sdc,total.patients) %>%
+  group_by(partner) %>%
+  summarise(.,number.patients.sdc=sum(number.patients.sdc,na.rm=TRUE),
+            total.patients=first(total.patients)) %>%
+  ungroup() %>%
+  summarise(.,number.patients.sdc=sum(number.patients.sdc,na.rm=TRUE),
+            total.patients=sum(total.patients,na.rm=TRUE)) %>%
+  mutate(.,cum_rate=number.patients.sdc/total.patients*100) %>%
+  clean_colnames(.)
+
+total.deaths.cum.pooled %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+
+```
+
+### All partners
+
+```{r cum.deaths, echo=TRUE, message=FALSE, warning=FALSE}
+
+total.deaths.cum <- table3.all.partners %>% 
+  filter(.,year_month=="2020-07",location=="anywhere",breakdown.level=="overall") %>%
+  select(.,partner,death_cum_pct) %>%
+  arrange(.,death_cum_pct) %>%
+  clean_colnames(.)
+
+total.deaths.cum %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+
+```

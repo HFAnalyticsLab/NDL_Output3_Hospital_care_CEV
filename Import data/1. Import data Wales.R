@@ -26,42 +26,103 @@ gitdir <- dirname(rstudioapi::getSourceEditorContext()$path)
 ##################### Table 1: HC usage #####################
 #############################################################
 
-###### Overall
+###### Overall - Admissions
 
-table1.overall.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
+table1A.overall.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
                                           sheet = "Table 3-1 Overall") %>%
+  mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
+         breakdown="overall",strata="overall",breakdown.level=type) %>%
+  select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events) %>%
+  filter(.,!(breakdown.level %in% c("outpatient_attendance","AE_attendance")))
+
+###### Overall - A&E and outpatient
+
+table1B.overall.wales <- read_excel(paste0(rawdatadir,"Wales/Output+3+Table_Outpat_A&E_V2.xlsx"),
+                                    sheet = "Table 3-1 Overall") %>%
   mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
          breakdown="overall",strata="overall",breakdown.level=type) %>%
   select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events)
 
-##### Age
+###### Overall
 
-table1.age.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
+table1.overall.wales <- plyr::rbind.fill(table1A.overall.wales,table1B.overall.wales)
+rm(table1A.overall.wales,table1B.overall.wales)
+
+##### Age - Admissions
+
+table1A.age.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
                                       sheet = "Table 3-1 Age") %>%
   mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
          breakdown="age",strata=age_group,breakdown.level=type) %>%
   select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events) %>%
   mutate(.,strata=str_replace_all(strata,"<30","0-29")) %>%
   mutate(.,strata=str_replace_all(strata,".to.","-")) %>%
-  mutate(.,strata=str_replace_all(strata,".or.older","+"))
-  
-##### Sex
+  mutate(.,strata=str_replace_all(strata,".or.older","+")) %>%
+  filter(.,!(breakdown.level %in% c("outpatient_attendance","AE_attendance")))
 
-table1.sex.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
+##### Age - A&E and outpatient
+
+table1B.age.wales <- read_excel(paste0(rawdatadir,"Wales/Output+3+Table_Outpat_A&E_V2.xlsx"),
+                                sheet = "Table 3-1 Age") %>%
+  mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
+         breakdown="age",strata=age_group,breakdown.level=type) %>%
+  select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events) %>%
+  mutate(.,strata=str_replace_all(strata,"<30","0-29")) %>%
+  mutate(.,strata=str_replace_all(strata,".to.","-")) %>%
+  mutate(.,strata=str_replace_all(strata,".or.older","+"))
+
+##### Age
+
+table1.age.wales <- plyr::rbind.fill(table1A.age.wales,table1B.age.wales)
+rm(table1A.age.wales,table1B.age.wales)
+
+##### Sex - Admissions
+
+table1A.sex.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
                                       sheet = "Table 3-1 Sex") %>%
+  mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
+         breakdown="sex",strata=sex,breakdown.level=type) %>%
+  select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events) %>%
+  mutate(.,strata=str_replace_all(strata,"female","F")) %>%
+  mutate(.,strata=str_replace_all(strata,"male","M")) %>%
+  filter(.,!(breakdown.level %in% c("outpatient_attendance","AE_attendance")))
+
+##### Sex - A&E and outpatient
+
+table1B.sex.wales <- read_excel(paste0(rawdatadir,"Wales/Output+3+Table_Outpat_A&E_V2.xlsx"),
+                               sheet = "Table 3-1 Sex") %>%
   mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
          breakdown="sex",strata=sex,breakdown.level=type) %>%
   select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events) %>%
   mutate(.,strata=str_replace_all(strata,"female","F")) %>%
   mutate(.,strata=str_replace_all(strata,"male","M"))
 
-##### IMD
+##### Sex
 
-table1.imd.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
+table1.sex.wales <- plyr::rbind.fill(table1A.sex.wales,table1B.sex.wales)
+rm(table1A.sex.wales,table1B.sex.wales)
+
+##### IMD - Admissions
+
+table1A.imd.wales <- read_excel(paste0(rawdatadir,"Wales/NDL Wales Output 3.xlsx"),
                                   sheet = "Table 3-1 Deprivation") %>%
   mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
          breakdown="imd",strata=deprivation,breakdown.level=type) %>%
+  select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events) %>%
+  filter(.,!(breakdown.level %in% c("outpatient_attendance","AE_attendance")))
+
+##### IMD - A&E and outpatient
+
+table1B.imd.wales <- read_excel(paste0(rawdatadir,"Wales/Output+3+Table_Outpat_A&E_V2.xlsx"),
+                               sheet = "Table 3-1 Deprivation") %>%
+  mutate(.,year_month=format(as.Date(time_start,format="%Y-%m-%d"),"%Y-%m"),
+         breakdown="imd",strata=deprivation,breakdown.level=type) %>%
   select(.,year_month,breakdown,strata,breakdown.level,number.patients,number.events)
+
+##### IMD
+
+table1.imd.wales <- plyr::rbind.fill(table1A.imd.wales,table1B.imd.wales)
+rm(table1A.imd.wales,table1B.imd.wales)
 
 ##### Aggregate
 

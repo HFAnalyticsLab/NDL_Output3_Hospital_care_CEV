@@ -39,7 +39,7 @@ ICD10_chapter_names <- c("1 - Certain infectious and parasitic diseases",
 names(ICD10_chapter_codes) <- ICD10_chapter_names
 
 ### Assign ICD-10 code prefixes to list
-### Source: https://icd.who.int/browse10/2019/en#/I (simplified version below where chapter span whole letters)
+### Source: https://icd.who.int/browse10/2019/en#/I (simplified version below where chapters span whole letters)
 ICD10_chapter_codes[[1]] <- c(paste0("A",sprintf("%02d", 0:99)),
                               paste0("B",sprintf("%02d", 0:99)))
 ICD10_chapter_codes[[2]] <- c(paste0("C",sprintf("%02d", 0:97)),
