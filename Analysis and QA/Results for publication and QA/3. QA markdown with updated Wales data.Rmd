@@ -43,7 +43,7 @@ setwd(gitdir)
 
 #Load partner data
 
-#Service use statistics (removing A&E and outpatient in Wales)
+#Service use statistics
 table1.all.partners <- fread("Visualize data/Data/table1.all.partners.csv",
                              header=TRUE, sep=",", check.names=T) %>%
   left_join(.,bl.orders,by="breakdown.level") %>%

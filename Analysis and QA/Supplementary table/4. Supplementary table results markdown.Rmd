@@ -1,0 +1,538 @@
+---
+title: "Networked Data Lab, healthcare use by CEV people"
+subtitle: "Supplementary analysis on hospital admissions (draft results)"
+author: "Sebastien Peytrignet, The Health Foundation"
+date: "4/13/2021"
+output:
+  html_document:
+    toc: true
+---
+
+```{r setup.A, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#Load packages
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(dplyr,stringr,ggplot2,easycsv,
+               gmodels,Rmisc,DescTools,data.table,
+               tibble,plotly,lubridate,
+               here,RColorBrewer,ggthemes,hrbrthemes,
+               tidyverse,showtext,tidytext,
+               knitr,kableExtra)
+
+#Clean up the global environment
+rm(list = ls())
+
+#Set directory where inputs are saved
+#rawdatadir <- "M:/Analytics/Networked Data Lab/Shielding/Shielding Behavioural Survey/"
+
+#Git directory
+#Git directory
+gitdir <- rstudioapi::getSourceEditorContext()$path %>%
+  dirname(.) %>%
+  dirname(.) %>%
+  dirname(.)
+
+#Set directory
+#setwd(rawdatadir)
+
+##################################################
+################### Load clean data ##############
+##################################################
+
+fread_folder(paste0(gitdir,"/Visualize data/Data/"), extension = "CSV")
+
+############################################
+################### Functions ##############
+############################################
+
+#Return top 10
+return_top_10 <- function(typefun,partnerfun){
+  out <- filter(tableS1.all.partners,partner==partnerfun,type==typefun) %>%
+    filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
+    mutate(.,abs_diff_1920=(number.events.2020.sdc-number.events.2019.sdc),
+           abs_sign_diff_1920=abs(number.events.2020.sdc-number.events.2019.sdc)) %>%
+    slice_max(.,abs_sign_diff_1920,n=10) %>%
+    arrange(.,type,partner,abs_diff_1920) %>%
+    select(.,type,partner,ICD10.chapter,abs_diff_1920,number.events.2019.sdc,number.events.2020.sdc,pct.change.1920) %>%
+    mutate(.,ICD10.number=as.numeric(stringr::word(ICD10.chapter,sep='-')))
+  return(out)
+}
+
+#Return top 5
+return_top_5 <- function(typefun,partnerfun){
+  out <- filter(tableS1.all.partners,partner==partnerfun,type==typefun) %>%
+    filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
+    mutate(.,abs_diff_1920=(number.events.2020.sdc-number.events.2019.sdc),
+           abs_sign_diff_1920=abs(number.events.2020.sdc-number.events.2019.sdc)) %>%
+    slice_max(.,abs_sign_diff_1920,n=5) %>%
+    arrange(.,type,partner,abs_diff_1920) %>%
+    select(.,type,partner,ICD10.chapter,abs_diff_1920,number.events.2019.sdc,number.events.2020.sdc,pct.change.1920) %>%
+    mutate(.,ICD10.number=as.numeric(stringr::word(ICD10.chapter,sep='-'))) %>%
+    mutate(.,ICD10.number=as.factor(ICD10.number))
+  return(out)
+}
+
+#Return top 5 (both types)
+return_both_top_5 <- function(partnerfun){
+  #Top 5 elective chapters
+  out_elective <- return_top_5(typefun="elective",partner=partnerfun) %>%
+    select(.,ICD10.chapter)
+  #Top 5 emergency chapters
+  out_emergency <- return_top_5(typefun="emergency",partner=partnerfun) %>%
+    select(.,ICD10.chapter)
+  #Absolute changes for those chapters
+  out.chap <- rbind(out_elective,out_emergency) %>% unique(.)
+  out.results <- filter(tableS1.all.partners,partner==partnerfun) %>%
+    filter(.,(ICD10.chapter %in% out.chap$ICD10.chapter)) %>%
+    mutate(.,abs_diff_1920=(number.events.2020.sdc-number.events.2019.sdc),
+           abs_sign_diff_1920=abs(number.events.2020.sdc-number.events.2019.sdc)) %>%
+    arrange(.,type,partner,abs_diff_1920) %>%
+    select(.,type,partner,ICD10.chapter,abs_diff_1920,number.events.2019.sdc,number.events.2020.sdc,pct.change.1920) %>%
+    mutate(.,ICD10.number=as.numeric(stringr::word(ICD10.chapter,sep='-'))) %>%
+    mutate(.,ICD10.number=as.factor(ICD10.number))
+  #Return function
+  return(out.results)
+}
+
+#Return top 10 (both types)
+return_both_top_10 <- function(partnerfun){
+  #Top 5 elective chapters
+  out_elective <- return_top_10(typefun="elective",partner=partnerfun) %>%
+    select(.,ICD10.chapter)
+  #Top 5 emergency chapters
+  out_emergency <- return_top_10(typefun="emergency",partner=partnerfun) %>%
+    select(.,ICD10.chapter)
+  #Absolute changes for those chapters
+  out.chap <- rbind(out_elective,out_emergency) %>% unique(.)
+  out.results <- filter(tableS1.all.partners,partner==partnerfun) %>%
+    filter(.,(ICD10.chapter %in% out.chap$ICD10.chapter)) %>%
+    mutate(.,abs_diff_1920=(number.events.2020.sdc-number.events.2019.sdc),
+           abs_sign_diff_1920=abs(number.events.2020.sdc-number.events.2019.sdc)) %>%
+    arrange(.,type,partner,abs_diff_1920) %>%
+    select(.,type,partner,ICD10.chapter,abs_diff_1920,number.events.2019.sdc,number.events.2020.sdc,pct.change.1920) %>%
+    mutate(.,ICD10.number=as.numeric(stringr::word(ICD10.chapter,sep='-'))) %>%
+    mutate(.,ICD10.number=as.factor(ICD10.number))
+  #Return function
+  return(out.results)
+}
+
+```
+
+More information into which conditions are included in ICD-10 chapters can be found here https://icd.codes/icd10cm
+
+## Key findings
+
+* The number of elective hospital admissions among CEV people fell sharply during the first lockdown, but some specialties were more protected than others, particularly renal and cancer.
+
+* In the case of cancer, there was a shift from elective admissions to emergency admissions (which were in fact higher than in 2019). This may reflect the way that sytems were reorganised during the pandemic.
+
+* Emergency admissions, in general, experienced smaller reductions.
+
+* Admissions for respiratory disease (the largest disease group within the CEV population) decreased on average by 60% for elective and 35% for emergency.
+
+## Absolute changes by ICD-10 chapter {.tabset}
+
+Chronic conditions are more likely appear during the pre-COVID period (March to July 2019). For example, people with cancer in March 2020 may have been 'healthy' during the same period in 2019 and, if their condition was recent, and this would explain a low number of admissions related to cancer.
+
+During the COVID period (March to July 2020), the most common **elective** admissions were related to cancer (chapter 2), renal [incl. dialysis] (chapter 14), digestive system (chapter 11), blood-related disorders [incl. anaemia] (chapter 3) and musculoskeletal [incl. many rare or autoimmune disorders] (chapter 13).
+
+During the COVID period (March to July 2020), the most common **emergency** admissions were related to general symptoms and signs [incl. cough or abnormal heartbeat] (chapter 18), respiratory conditions (chapter 10), circulatory [incl. hypertension] (chapter 9), injuries (chapter 19) and digestive system (chapter 11). There is a steep decrease in emergency admissions for respiratory conditions, and an increase in emergency admissions related to cancer. This is explored in more detail in the next section.
+
+### Elective admissions
+
+```{r, abs.elective, echo=FALSE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
+
+tableS1.data.elective <- tableS1.all.partners %>%
+  filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
+  filter(.,type=="elective") %>%
+  select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %>%
+  gather(., year, number.events, number.events.2019.sdc:number.events.2020.sdc, factor_key=TRUE) %>%
+  mutate(.,year=str_replace_all(year,"number.events.2019.sdc","2019")) %>%
+  mutate(.,year=str_replace_all(year,"number.events.2020.sdc","2020")) %>%
+  mutate(.,year=as.numeric(year)) %>%
+  arrange(.,partner,-year,-number.events)
+
+chart.elective <- filter(tableS1.data.elective,partner=="Average") %>%
+  ggplot(., aes(x=factor(year), y=number.events, group=ICD10.chapter, color=ICD10.chapter)) +
+  geom_line() +
+  ggtitle("Number of elective admissions by ICD-10 chapter") +
+  scale_y_continuous(labels = scales::comma) +
+  theme_ipsum() +
+  xlab("Year") +
+  ylab("Number of admissions") +
+  labs(col="ICD-10 chapter") +
+  theme(legend.position = "none",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 8),
+        legend.text=element_text(size=9),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 8),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(chart.elective)
+
+tableS1.all.partners %>%
+  filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
+  filter(.,type=="elective",partner=="Average") %>%
+  select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %>%
+  arrange(.,-number.events.2020.sdc) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+
+```
+
+### Emergency admissions
+
+```{r, abs.emergency, echo=FALSE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
+
+tableS1.data.emergency <- tableS1.all.partners %>%
+  filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
+  filter(.,type=="emergency") %>%
+  select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %>%
+  gather(., year, number.events, number.events.2019.sdc:number.events.2020.sdc, factor_key=TRUE) %>%
+  mutate(.,year=str_replace_all(year,"number.events.2019.sdc","2019")) %>%
+  mutate(.,year=str_replace_all(year,"number.events.2020.sdc","2020")) %>%
+  mutate(.,year=as.numeric(year))
+
+chart.emergency <- filter(tableS1.data.emergency,partner=="Average") %>%
+  ggplot(., aes(x=factor(year), y=number.events, group=ICD10.chapter, color=ICD10.chapter)) +
+  geom_line() +
+  ggtitle("Number of emergency admissions by ICD-10 chapter") +
+  scale_y_continuous(labels = scales::comma) +
+  theme_ipsum() +
+  xlab("Year") +
+  ylab("Number of admissions") +
+  labs(col="ICD-10 chapter") +
+  theme(legend.position = "none",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 8),
+        legend.text=element_text(size=9),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 8),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(chart.emergency)
+
+tableS1.all.partners %>%
+  filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
+  filter(.,type=="emergency",partner=="Average") %>%
+  select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %>%
+  arrange(.,-number.events.2020.sdc) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+
+```
+
+<!-- ### Elective admissions (Grampian) -->
+
+<!-- ```{r, abs.elective.grampian, echo=FALSE, message=FALSE, warning=FALSE,fig.width=10,fig.height=12} -->
+
+<!-- chart.elective.grampian <- filter(tableS1.data.elective,partner=="Grampian") %>% -->
+<!--   ggplot(., aes(x=year, y=number.events, group=ICD10.chapter, color=ICD10.chapter)) + -->
+<!--   geom_line() + -->
+<!--   ggtitle("Number of elective admissions by ICD-10 chapter") + -->
+<!--   theme_ipsum() + -->
+<!--   xlab("Year") + -->
+<!--   ylab("Number of admissions") + -->
+<!--   labs(col="ICD-10 chapter") + -->
+<!--   theme(legend.position = "none", -->
+<!--         panel.border = element_blank(), -->
+<!--         panel.grid.major = element_blank(), panel.grid.minor = element_blank(), -->
+<!--         panel.background = element_blank(), -->
+<!--         axis.ticks.x=element_blank(), -->
+<!--         text = element_text(size = 8), -->
+<!--         legend.text=element_text(size=9), -->
+<!--         axis.text = element_text(size = 8), -->
+<!--         axis.text.x = element_text(angle = 90, hjust = 1,size = 8), -->
+<!--         axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm"))) -->
+
+<!-- ggplotly(chart.elective.grampian) -->
+
+<!-- tableS1.all.partners %>% -->
+<!--   filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>% -->
+<!--   filter(.,type=="elective",partner=="Grampian") %>% -->
+<!--   select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %>% -->
+<!--   arrange(.,-number.events.2020.sdc) %>% -->
+<!--   kable(.,digits=0,format.args = list(big.mark = ",")) %>% -->
+<!--   kable_styling() -->
+
+<!-- ``` -->
+
+<!-- ### Emergency admissions (Grampian) -->
+
+<!-- ```{r, abs.emergency.grampian, echo=FALSE, message=FALSE, warning=FALSE,fig.width=10,fig.height=12} -->
+
+<!-- chart.emergency.grampian <- filter(tableS1.data.emergency,partner=="Grampian") %>% -->
+<!--   ggplot(., aes(x=year, y=number.events, group=ICD10.chapter, color=ICD10.chapter)) + -->
+<!--   geom_line() + -->
+<!--   ggtitle("Number of emergency admissions by ICD-10 chapter") + -->
+<!--   theme_ipsum() + -->
+<!--   xlab("Year") + -->
+<!--   ylab("Number of admissions") + -->
+<!--   labs(col="ICD-10 chapter") + -->
+<!--   theme(legend.position = "none", -->
+<!--         panel.border = element_blank(), -->
+<!--         panel.grid.major = element_blank(), panel.grid.minor = element_blank(), -->
+<!--         panel.background = element_blank(), -->
+<!--         axis.ticks.x=element_blank(), -->
+<!--         text = element_text(size = 8), -->
+<!--         legend.text=element_text(size=9), -->
+<!--         axis.text = element_text(size = 8), -->
+<!--         axis.text.x = element_text(angle = 90, hjust = 1,size = 8), -->
+<!--         axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm"))) -->
+
+<!-- ggplotly(chart.emergency.grampian) -->
+
+<!-- tableS1.all.partners %>% -->
+<!--   filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>% -->
+<!--   filter(.,type=="emergency",partner=="Grampian") %>% -->
+<!--   select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %>% -->
+<!--   arrange(.,-number.events.2020.sdc) %>% -->
+<!--   kable(.,digits=0,format.args = list(big.mark = ",")) %>% -->
+<!--   kable_styling() -->
+
+<!-- ``` -->
+
+## Top 5 highest absolute changes
+
+**Elective** admissions related to cancer and the digestive system saw the highest reductions at all locations except Grampian. This was usually followed by admissions for diseases of the eye of musculoskeletal conditions. In both Wales and North West London, reductions for cancer admissions are much larger than for other specialties. In Grampian, the main difference is that elective admissions for cancer were more 'protected'.
+
+### Elective
+
+```{r top5elective, echo=FALSE, message=FALSE, warning=FALSE,fig.width=17,fig.height=6}
+
+data.abs.elective.chart.data <- rbind(return_top_5(typefun="elective",partnerfun="Average"),
+return_top_5(typefun="elective",partnerfun="NW London"),
+return_top_5(typefun="elective",partnerfun="Leeds"),
+return_top_5(typefun="elective",partnerfun="Liverpool and Wirral"),
+return_top_5(typefun="elective",partnerfun="Wales"),
+return_top_5(typefun="elective",partnerfun="Grampian"))
+
+data.abs.elective.chart <- data.abs.elective.chart.data %>%
+  ggplot(., aes(x=reorder_within(ICD10.number,abs_diff_1920,partner), y=abs_diff_1920)) +
+  geom_bar(aes(fill=ICD10.chapter), stat="identity", width=0.5) +
+  facet_wrap(~ partner, scales = "free") +
+  ggtitle("Elective admissions: ICD-10 chapters with largest changes between 2019-2020") +
+  scale_y_continuous(labels = scales::comma) +
+  tidytext::scale_x_reordered() +
+  xlab("Chapter") +
+  ylab(" ") +
+  labs(fill="ICD-10") +
+  theme(legend.position = "bottom",
+        legend.text=element_text(size=8))
+
+ggplotly(data.abs.elective.chart)
+
+```
+
+### Emergency
+
+For **emergency** admissions, the biggest reduction was for respiratory conditions and this was common across partners. This was usually followed by 'signs and symptoms' (which is often a 'catch-all' category that includes reasons such as unspecified cough or headache). Emergency admissions for cancer were higher during this period compared to the previous year, in all locations except Leeds. In Grampian, there was an increase in emergency admissions for many specialties.
+
+```{r top5emergency, echo=FALSE, message=FALSE, warning=FALSE,fig.width=17,fig.height=6}
+
+data.abs.emergency.chart.data <- rbind(return_top_5(typefun="emergency",partnerfun="Average"),
+                                      return_top_5(typefun="emergency",partnerfun="NW London"),
+                                      return_top_5(typefun="emergency",partnerfun="Leeds"),
+                                      return_top_5(typefun="emergency",partnerfun="Liverpool and Wirral"),
+                                      return_top_5(typefun="emergency",partnerfun="Wales"),
+                                      return_top_5(typefun="emergency",partnerfun="Grampian"))
+
+data.abs.emergency.chart <- data.abs.emergency.chart.data %>%
+  ggplot(., aes(x=reorder_within(ICD10.number,abs_diff_1920,partner), y=abs_diff_1920)) +
+  geom_bar(aes(fill=ICD10.chapter), stat="identity", width=0.5) +
+  facet_wrap(~ partner, scales = "free") +
+  ggtitle("Emergency admissions: ICD-10 chapters with largest changes between 2019-2020") +
+  scale_y_continuous(labels = scales::comma) +
+  tidytext::scale_x_reordered() +
+  xlab("Chapter") +
+  ylab(" ") +
+  labs(fill="ICD-10") +
+  theme(legend.position = "bottom",
+        legend.text=element_text(size=8))
+
+ggplotly(data.abs.emergency.chart)
+
+```
+
+## Relative change in admissions by ICD-10 chapter
+
+This chart only includes chapters that are in the aggregate top 10 chapters by number of admissions in either: 2019 or 2020, elective or emergency (4 combinations).
+
+On the **elective** side, there were steep decreases across all specialties. Most of elective care was canceled during this period. Elective admissions for renal/dialysis (chapter 14) and cancer (chapter 2) were the most protected.
+
+On the **emergency** side, we also saw decreases but they tend to be smaller than those seen in elective care. In the case of cancer, while elective admissions decreased, emergency admissions increased in most places. In Grampian, as seen in other analyses, emergency admissions were generally higher over this period compared to 2019 (particularly for cancer).
+
+Hospital care for respiratory conditions (the largest disease group among CEV patients) fell steeply - these are often chronic conditions that develop over a long time, meaning that there was potentially unmet need for patients with respiratory conditions.
+
+```{r chunk0, echo=FALSE, message=FALSE, warning=FALSE,fig.width=20,fig.height=15}
+
+#Top 10 - elective - 2019
+top10_a <- filter(tableS1.all.partners,type=="elective",partner=="Average") %>%
+  slice_max(number.events.2019.sdc, n = 10) %>%
+  select(.,ICD10.chapter) %>%
+  unique(.)
+
+#Top 10 - emergency - 2019
+top10_b <- filter(tableS1.all.partners,type=="emergency",partner=="Average") %>%
+  slice_max(number.events.2019.sdc, n = 10) %>%
+  select(.,ICD10.chapter) %>%
+  unique(.)
+
+#Top 10 - elective - 2020
+top10_c <- filter(tableS1.all.partners,type=="elective",partner=="Average") %>%
+  slice_max(number.events.2020.sdc, n = 10) %>%
+  select(.,ICD10.chapter) %>%
+  unique(.)
+
+#Top 10 - emergency - 2020
+top10_d <- filter(tableS1.all.partners,type=="emergency",partner=="Average") %>%
+  slice_max(number.events.2020.sdc, n = 10) %>%
+  select(.,ICD10.chapter) %>%
+  unique(.)
+
+#Top 10 summary
+top10 <- rbind(top10_a,top10_b,top10_c,top10_d) %>%
+  unique(.) %>%
+  filter(.,!(ICD10.chapter %in% c("22 - Codes for special purposes")))
+rm(top10_a,top10_b,top10_c,top10_d)
+
+#Order of rows
+orderS1 <- tableS1.all.partners %>%
+  filter(.,type=="elective",partner=="Average") %>%
+  filter(.,(ICD10.chapter %in% top10$ICD10.chapter)) %>%
+  arrange(.,-pct.change.1920) %>%
+  mutate(.,order=1:nrow(.)) %>%
+  select(.,ICD10.chapter,order)
+
+#Chart data
+tableS1.data <- tableS1.all.partners %>%
+  filter(.,(ICD10.chapter %in% top10$ICD10.chapter)) %>%
+  left_join(.,orderS1,by="ICD10.chapter")
+
+#Chart
+tableS1.chart <- tableS1.data %>%
+  ggplot(., aes(y = reorder(ICD10.chapter, -order), x = pct.change.1920,col=partner)) +
+  geom_point(size = 3) +  # Use a larger dot
+  geom_vline(xintercept = 0, linetype="dashed", 
+             color = "black", size=1) +
+  facet_wrap(~ type) +
+  theme_ipsum() +
+  labs(title="% change in number of events",subtitle="March to July period, 2019-2020",
+       x ="% change", y = " ") +
+  theme(legend.text=element_text(size=11),
+        text = element_text(size = 11),
+        axis.text = element_text(size =11),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(size =8),
+        axis.title.y = element_text(size =11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(tableS1.chart) %>%
+  layout(title = list(text = paste0('% change in number of events',
+                                    '<br>',
+                                    '<sup>',
+                                    'March to July period, 2019-2020',
+                                    '</sup>')))
+```
+
+## Relative change in admissions by selected ICD-10 chapters
+
+```{r chunk1, echo=FALSE, message=FALSE, warning=FALSE,fig.width=20,fig.height=10}
+
+#Selected chapters
+selected_chap <- c("14 - Diseases of the genitourinary system",
+"2 - Neoplasms",
+"19 - Injury, poisoning and certain other consequences of external causes",
+"11 - Diseases of the digestive system",
+"10 - Diseases of the respiratory system")
+
+#Order of rows
+orderS1 <- tableS1.all.partners %>%
+  filter(.,type=="elective",partner=="Average") %>%
+  filter(.,(ICD10.chapter %in% selected_chap)) %>%
+  arrange(.,-pct.change.1920) %>%
+  mutate(.,order=1:nrow(.)) %>%
+  select(.,ICD10.chapter,order)
+
+#Chart data
+tableS1.data <- tableS1.all.partners %>%
+  filter(.,partner=="Average") %>%
+  filter(.,(ICD10.chapter %in% selected_chap)) %>%
+  left_join(.,orderS1,by="ICD10.chapter")
+
+#Chart
+tableS1.chart <- tableS1.data %>%
+  ggplot(., aes(y = reorder(ICD10.chapter, -order), x = pct.change.1920,col=partner)) +
+  geom_point(size = 4) +  # Use a larger dot
+  geom_vline(xintercept = 0, linetype="dashed", 
+             color = "black", size=1) +
+  facet_wrap(~ type) +
+  theme_ipsum() +
+  labs(title="% change in number of events",subtitle="March to July period, 2019-2020",
+       x ="% change", y = " ") +
+  theme(legend.text=element_text(size=16),
+        strip.text = element_text(size=16),
+        plot.title = element_text(size=16),
+        text = element_text(size = 16),
+        axis.text = element_text(size =16),
+        axis.text.x = element_text(angle = 45, hjust = 1,size =16),
+        axis.text.y = element_text(size =16),
+        axis.title.y = element_text(size =16),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm"),size =16))
+
+ggplotly(tableS1.chart) %>%
+  layout(title = list(text = paste0('% change in number of events',
+                                    '<br>',
+                                    '<sup>',
+                                    'March to July period, 2019-2020',
+                                    '</sup>')))
+```
+
+## Top 5 ICD-10 chapters with the highest changes during pandemic
+
+```{r chunk2, echo=FALSE, message=FALSE, warning=FALSE,fig.width=20,fig.height=10}
+
+#Both types in same chart
+data.both <- rbind(return_both_top_5(partnerfun="Average"),
+                                       return_both_top_5(partnerfun="NW London"),
+                                       return_both_top_5(partnerfun="Leeds"),
+                                       return_both_top_5(partnerfun="Liverpool and Wirral"),
+                                      return_both_top_5(partnerfun="Wales"),
+                                      return_both_top_5(partnerfun="Grampian"))
+
+data.both <- data.both %>%
+  group_by(partner,ICD10.chapter) %>%
+  mutate(.,max_change=max(abs(abs_diff_1920))) %>%
+  ungroup() %>%
+  arrange(.,partner,ICD10.chapter,type) %>%
+  left_join(.,unique.chapters.labels,by="ICD10.chapter")
+
+chart.abs.both <- data.both %>%
+  ggplot(., aes(x=reorder_within(ICD10.number,-max_change,partner), y=abs_diff_1920)) +
+  geom_bar(aes(fill = type), position = "dodge", stat="identity", width=0.5) +
+  facet_wrap(~ partner, scales = "free") +
+  ggtitle("Hospital admissions: ICD-10 chapters with largest changes between 2019-2020") +
+  scale_y_continuous(labels = scales::comma) +
+  tidytext::scale_x_reordered() +
+  xlab("Chapter") +
+  ylab(" ") +
+  labs(fill="Type of admission") +
+  theme(axis.text.x = element_text(angle = 45),
+        legend.position = "right",
+        legend.text=element_text(size=8))
+
+ggplotly(chart.abs.both) %>%
+  layout(title = list(text = paste0('Hospital admissions: ICD-10 chapters with largest changes',
+                                    '<br>',
+                                    '<sup>',
+                                    'March to July period, 2019-2020',
+                                    '</sup>')))
+```
