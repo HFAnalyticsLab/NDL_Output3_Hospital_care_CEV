@@ -1,0 +1,465 @@
+---
+title: "Networked Data Lab, healthcare use by CEV people"
+subtitle: "Supplementary analysis on general population comparison (draft results)"
+author: "Sebastien Peytrignet, The Health Foundation"
+date: "10/5/2021"
+output:
+  html_document:
+    toc: true
+---
+
+```{r setup.A, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#Load packages
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(dplyr,stringr,ggplot2,easycsv,
+               gmodels,DescTools,data.table,
+               tibble,plotly,lubridate,
+               here,RColorBrewer,ggthemes,hrbrthemes,
+               tidyverse,showtext,tidytext,
+               knitr,kableExtra)
+
+#Clean up the global environment
+rm(list = ls())
+
+#Set directory where inputs are saved
+#rawdatadir <- "M:/Analytics/Networked Data Lab/Shielding/Shielding Behavioural Survey/"
+
+#Git directory
+gitdir <- rstudioapi::getSourceEditorContext()$path %>%
+  dirname(.) %>%
+  dirname(.) %>%
+  dirname(.)
+
+#Set directory
+#setwd(rawdatadir)
+
+#Auxiliary function
+sumunique <- function(x){
+  return(sum(unique(x)))
+}
+
+##################################################
+################### Load clean data ##############
+##################################################
+
+######################## Load data 
+
+fread_folder(paste0(gitdir,"/Visualize data/Data/"), extension = "CSV")
+
+######################## Add pooled data
+
+tableS2.all.partners.pooled <- tableS2.all.partners %>%
+  filter(.,!(breakdown.level %in% c("admissions_all","admissions_other"))) %>%
+  filter(.,year_month>="2019-01") %>%
+  group_by(breakdown.level,year_month,year_month_day,cohort) %>%
+  summarise(number.events.sdc=sum(number.events.sdc),
+            total.patients=sum(total.patients),
+            cases.per.100=number.events.sdc/total.patients*100,
+            year=first(year),
+            month=first(month)) %>%
+  ungroup() %>%
+  mutate(.,partner="Average")
+
+tableS2.all.partners <- plyr::rbind.fill(tableS2.all.partners,tableS2.all.partners.pooled)
+rm(tableS2.all.partners.pooled)
+
+######################## % change data
+
+tableS2.all.partners.pcts <-  tableS2.all.partners %>%
+  mutate(.,year_month_day=lubridate::ymd(year_month_day),
+         year_l1=(as.numeric(year)-1)) %>%
+  mutate(.,year_month_day_l1=lubridate::ymd(paste(year_l1,month,"01",sep="-")),
+         keyone=paste(partner,cohort,breakdown.level,sep="-"))
+
+tableS2.all.partners.pcts.l1 <- tableS2.all.partners.pcts %>%
+  select(.,keyone,year_month_day,number.events.sdc) %>%
+  dplyr::rename(.,number.events.sdc_l1=number.events.sdc,
+                year_month_day_l1=year_month_day)
+
+tableS2.all.partners.pcts <- left_join(tableS2.all.partners.pcts,
+                                       tableS2.all.partners.pcts.l1,
+                                      by=c("keyone","year_month_day_l1")) %>%
+  select(.,-c("keyone","year_l1")) %>%
+  mutate(.,pct_change_20to19=(number.events.sdc-number.events.sdc_l1)/number.events.sdc_l1*100,
+         abs_change_12m=(number.events.sdc-number.events.sdc_l1)) %>%
+  mutate(.,year_month_day=lubridate::ymd(year_month_day)) %>%
+  filter(.,year_month>="2019-07") %>%
+  arrange(.,partner,cohort,breakdown.level,year_month)
+rm(tableS2.all.partners.pcts.l1)
+
+```
+
+## Key findings
+
+* CEV were much higher users of all types of secondary health care in both 2019 and 2020. Adjusted for the size of the population, they had 5.8 times more outpatient use than non-CEV people in 2019 (range of 4.2 to 6.6). They had approximately 12 times more elective admissions in 2019 than non-CEV people.
+
+* The non-CEV cohort was much younger than the CEV cohort. In NW London, the average age of the non-CEV cohort was 36 compared to 63 for CEV people. In Liverpool and Wirral, the age differences were even starker. There were no differences according to deprivation.
+
+* In North West London, outpatient and A&E attendances fell at approximately the same rate for CEV and non-CEV people. In April 2020, compared to the same month in 2019, outpatient attendances were down by 47% for CEV people and 42%% for everyone else. In the case of hospital admissions (emergency and elective), activity fell less steeply for CEV people compared to non-CEV people. Elective admissions fell by 90% for non-CEV people and 65% for CEV people.
+
+* In Liverpool and Wirral, across all types of services, activity fell less steeply for CEV people. For example, in April 2020, elective admissions fell by 90% for non-CEV people but only by 49% for CEV people.
+
+## Number of contacts per person {.tabset}
+
+### Outpatient attendances
+
+```{r, abs.outpatient, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+abs.outpatient.data <- tableS2.all.partners %>%
+  filter(.,breakdown.level=="outpatient_attendance") %>%
+  filter(.,year_month>="2019-01")
+
+abs.outpatient.chart <- abs.outpatient.data %>%
+  ggplot(., aes(x=year_month, y=cases.per.100, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  facet_wrap(~ partner) +
+  ggtitle("Contacts per 100 people") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("Contacts per 100 people") +
+  labs(col="Cohort") +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 11),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(abs.outpatient.chart)
+
+abs.outpatient.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+### A&E attendances
+
+```{r, abs.ae, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+abs.ae.data <- tableS2.all.partners %>%
+  filter(.,breakdown.level=="AE_attendance") %>%
+  filter(.,year_month>="2019-01")
+
+abs.ae.chart <- abs.ae.data %>%
+  ggplot(., aes(x=year_month, y=cases.per.100, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  facet_wrap(~ partner) +
+  ggtitle("Contacts per 100 people") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("Contacts per 100 people") +
+  labs(col="Cohort") +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 1),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(abs.ae.chart)
+
+abs.ae.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+### Elective admissions
+
+```{r, abs.elective, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+abs.elective.data <- tableS2.all.partners %>%
+  filter(.,breakdown.level=="admissions_electives") %>%
+  filter(.,year_month>="2019-01")
+
+abs.elective.chart <- abs.elective.data %>%
+  ggplot(., aes(x=year_month, y=cases.per.100, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  facet_wrap(~ partner) +
+  ggtitle("Contacts per 100 people") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("Contacts per 100 people") +
+  labs(col="Cohort") +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 11),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(abs.elective.chart)
+
+abs.elective.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+### Emergency admissions
+
+```{r, abs.emergency, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+abs.emergency.data <- tableS2.all.partners %>%
+  filter(.,breakdown.level=="admissions_emergency") %>%
+  filter(.,year_month>="2019-01")
+
+abs.emergency.chart <- abs.emergency.data %>%
+  ggplot(., aes(x=year_month, y=cases.per.100, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  facet_wrap(~ partner) +
+  ggtitle("Contacts per 100 people") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("Contacts per 100 people") +
+  labs(col="Cohort") +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 11),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(abs.emergency.chart)
+
+abs.emergency.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+## % change in activity compared to previous year {.tabset}
+
+### Outpatient attendances
+
+```{r, rel.outpatient, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+rel.outpatient.data <- tableS2.all.partners.pcts %>%
+  filter(.,breakdown.level=="outpatient_attendance") %>%
+  filter(.,year_month>="2019-01")
+
+rel.outpatient.chart <- rel.outpatient.data %>%
+  ggplot(., aes(x=year_month, y=pct_change_20to19, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  geom_hline(yintercept=0, linetype="dashed", color = "grey") +
+  ggtitle("% change relative to the previous year") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("% change") +
+  labs(col="Cohort") +
+  facet_wrap(~ partner) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 11),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(rel.outpatient.chart)
+
+rel.outpatient.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+### A&E attendances
+
+```{r, rel.ae, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+rel.ae.data <- tableS2.all.partners.pcts %>%
+  filter(.,breakdown.level=="AE_attendance") %>%
+  filter(.,year_month>="2019-01")
+
+rel.ae.chart <- rel.ae.data %>%
+  ggplot(., aes(x=year_month, y=pct_change_20to19, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  geom_hline(yintercept=0, linetype="dashed", color = "grey") +
+  ggtitle("% change relative to the previous year") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("% change") +
+  labs(col="Cohort") +
+  facet_wrap(~ partner) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 11),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(rel.ae.chart)
+
+rel.ae.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+### Elective admissions
+
+```{r, rel.elective, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+rel.elective.data <- tableS2.all.partners.pcts %>%
+  filter(.,breakdown.level=="admissions_electives") %>%
+  filter(.,year_month>="2019-01")
+
+rel.elective.chart <- rel.elective.data %>%
+  ggplot(., aes(x=year_month, y=pct_change_20to19, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  geom_hline(yintercept=0, linetype="dashed", color = "grey") +
+  ggtitle("% change relative to the previous year") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("% change") +
+  labs(col="Cohort") +
+  facet_wrap(~ partner) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 11),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(rel.elective.chart)
+
+rel.elective.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+### Emergency admissions
+
+```{r, rel.emergency, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+rel.emergency.data <- tableS2.all.partners.pcts %>%
+  filter(.,breakdown.level=="admissions_emergency") %>%
+  filter(.,year_month>="2019-01")
+
+rel.emergency.chart <- rel.emergency.data %>%
+  ggplot(., aes(x=year_month, y=pct_change_20to19, group=cohort)) +
+  geom_line(aes(color=cohort)) +
+  geom_hline(yintercept=0, linetype="dashed", color = "grey") +
+  ggtitle("% change relative to the previous year") +
+  theme_ipsum() +
+  xlab("Year month") +
+  ylab("% change") +
+  labs(col="Cohort") +
+  facet_wrap(~ partner) +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks.x=element_blank(),
+        text = element_text(size = 11),
+        legend.text=element_text(size=11),
+        axis.text = element_text(size = 11),
+        axis.text.x = element_text(angle = 90, hjust = 1,size = 11),
+        axis.title.x = element_text(margin = unit(c(3, 0, 0, 0), "mm")))
+
+ggplotly(rel.emergency.chart)
+
+rel.emergency.data %>%
+  select(.,breakdown.level,partner,cohort,year_month,number.patients,number.events.sdc,total.patients,cases.per.100) %>%
+  arrange(.,breakdown.level,partner,cohort,year_month) %>%
+  kable(.,digits=0,format.args = list(big.mark = ",")) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%", height = "600px")
+
+```
+
+## Sum over 2019 and 2020
+
+```{r, sumchunk, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+sum.over.year <- tableS2.all.partners %>%
+  filter(.,year %in% c("2019","2020"),partner!="Average") %>%
+  group_by(partner,breakdown.level,cohort,year) %>%
+  summarise(.,total.activity=sum(number.events.sdc),
+            total.patients=first(total.patients)) %>%
+  ungroup() %>%
+  pivot_wider(
+    names_from = cohort,
+    names_sep = ".",
+    values_from = c(total.activity,total.patients)
+  ) %>%
+  mutate(.,agg_rate_cev=`total.activity.SPL`/`total.patients.SPL`,
+         agg_rate_noncev=`total.activity.Non SPL`/`total.patients.Non SPL`,
+         ratio_cev_noncev=agg_rate_cev/agg_rate_noncev)
+
+sum.over.year %>%
+  arrange(.,breakdown.level,year,partner) %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+```
+
+## Sum over 2019 and 2020 (Pooled)
+
+```{r, sumchunk.pooled, echo=FALSE, message=FALSE, warning=FALSE,fig.width=12,fig.height=6}
+
+sum.over.year.pooled <- tableS2.all.partners %>%
+  filter(.,year %in% c("2019","2020"),partner!="Average",breakdown.level!="admissions_all",breakdown.level!="admissions_other") %>%
+  group_by(breakdown.level,cohort,year) %>%
+  summarise(.,total.activity=sum(number.events.sdc),
+            total.patients=sumunique(total.patients)) %>%
+  ungroup() %>%
+  pivot_wider(
+    names_from = cohort,
+    names_sep = ".",
+    values_from = c(total.activity,total.patients)
+  ) %>%
+  mutate(.,agg_rate_cev=`total.activity.SPL`/`total.patients.SPL`,
+         agg_rate_noncev=`total.activity.Non SPL`/`total.patients.Non SPL`,
+         ratio_cev_noncev=agg_rate_cev/agg_rate_noncev)
+
+sum.over.year.pooled %>%
+  arrange(.,breakdown.level,year) %>%
+  kable(.,digits=1,format.args = list(big.mark = ",")) %>%
+  kable_styling()
+```
+

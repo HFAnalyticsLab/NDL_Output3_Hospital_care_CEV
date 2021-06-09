@@ -635,10 +635,34 @@ fwrite(data.both.flourish, file = paste0(onedrivedir,"top10.changes.admissions.b
 
 #Save for Flourish (% change chart)
 
-data.both.pct.flourish <- data.both %>%
+# data.both.pct.flourish <- data.both %>%
+#   filter(.,partner=="Average") %>%
+#   select(.,partner,type,ICD10.chapter,ICD10.number,ICD10.label,pct.change.1920) %>%
+#   arrange(.,partner,type,-pct.change.1920)
+# 
+# onedrivedir <- "C:/Users/SebastienP/OneDrive - The Health Foundation/Output 3/Charts/"
+# fwrite(data.both.pct.flourish, file = paste0(onedrivedir,"top10.changes.admissions.both.pct.csv"), sep = ",")
+
+#############################################################
+##################### Pooled line chart #####################
+#############################################################
+
+unique.chapters.labels <- fread(paste0(gitdir,"/Visualize data/Data/unique.chapters.labels.csv"),
+                                header=TRUE, sep=",", check.names=T)
+
+data.both <- rbind(return_both_top_10(partnerfun="Average"),
+                   return_both_top_10(partnerfun="NW London"),
+                   return_both_top_10(partnerfun="Leeds"),
+                   return_both_top_10(partnerfun="Liverpool and Wirral"),
+                   return_both_top_10(partnerfun="Wales"),
+                   return_both_top_10(partnerfun="Grampian"))
+
+data.both.flourish <- data.both %>%
   filter(.,partner=="Average") %>%
-  select(.,partner,type,ICD10.chapter,ICD10.number,ICD10.label,pct.change.1920) %>%
-  arrange(.,partner,type,-pct.change.1920)
+  arrange(.,partner,type,abs_diff_1920) %>%
+  left_join(.,unique.chapters.labels,by="ICD10.chapter") %>%
+  filter(.,partner=="Average") %>%
+  select(.,type,ICD10.chapter,ICD10.number,ICD10.label,abs_diff_1920)
 
 onedrivedir <- "C:/Users/SebastienP/OneDrive - The Health Foundation/Output 3/Charts/"
-fwrite(data.both.pct.flourish, file = paste0(onedrivedir,"top10.changes.admissions.both.pct.csv"), sep = ",")
+fwrite(data.both.flourish, file = paste0(onedrivedir,"top10.changes.admissions.both.csv"), sep = ",")
