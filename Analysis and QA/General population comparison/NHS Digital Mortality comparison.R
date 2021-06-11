@@ -51,7 +51,10 @@ nhsdigital.mortality <- fread(paste0(rawdatadir,"Tracking Healthcare Activity an
   ) %>%
   mutate(.,Date=lubridate::dmy(Date)) %>%
   filter(.,Date<="2020-07-31")
-  
+
+nhsdigital.mortality %>%
+  slice_max(.,SPL,n=1)
+
 ######################## Save
 
 fwrite(nhsdigital.mortality, file = paste0(onedrivedir,"nhsdigital.mortality.csv"), sep = ",")

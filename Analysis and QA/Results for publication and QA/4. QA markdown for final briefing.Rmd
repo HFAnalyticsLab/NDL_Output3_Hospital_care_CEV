@@ -3,10 +3,8 @@ title: "Networked Data Lab, hospital use among CEV people during COVID-19"
 author: "Sebastien Peytrignet"
 date: "4/14/2021"
 output:
-  prettydoc::html_pretty:
-    theme: architect
-    highlight: github
-    toc: TRUE
+  html_document:
+    toc: true
 ---
 
 ```{r setup.A, include=FALSE}
