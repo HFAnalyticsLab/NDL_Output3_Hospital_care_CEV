@@ -50,6 +50,9 @@ month.lookup <- data.frame(month.number=c("01","02","03","04","05","06","07","08
 ################# Service use statistics #################
 ##########################################################
 
+#Date on number of monthly admissions/attendances/other at each of the five NDL locations
+#It also includes data broken down by age band, sex and deprivation
+
 table1.all.partners <- fread("Visualize data/Data/table1.all.partners.csv",
                              header=TRUE, sep=",", check.names=T) %>%
   left_join(.,bl.orders,by="breakdown.level") %>%
@@ -61,7 +64,7 @@ table1.all.partners <- fread("Visualize data/Data/table1.all.partners.csv",
 
 #Changes in service use data
 #This step creates a new column for each row of data (activity levels one year ago)
-#and computes the absolute and relative difference
+#and computes the absolute and relative difference (this month vs. same month a year algo)
 
 table1.all.partners.pcts <-  table1.all.partners %>%
   filter(., !(strata %in% c("unknown","unknown/other"))) %>%
@@ -78,7 +81,7 @@ table1.all.partners.pcts.l1 <- table1.all.partners.pcts %>%
   dplyr::rename(.,number.events.sdc_l1=number.events.sdc,
                 year_month_day_l1=year_month_day)
 
-#Merged back into main data
+#Merged lags data back into main data
 table1.all.partners.pcts <- left_join(table1.all.partners.pcts,
                                       table1.all.partners.pcts.l1,
                                       by=c("keyone","year_month_day_l1")) %>%
@@ -128,11 +131,13 @@ tableS2.all.partners.pcts <-  tableS2.all.partners %>%
   mutate(.,year_month_day_l1=lubridate::ymd(paste(year_l1,month,"01",sep="-")),
          keyone=paste(partner,cohort,breakdown.level,sep="-"))
 
+#Lags data
 tableS2.all.partners.pcts.l1 <- tableS2.all.partners.pcts %>%
   select(.,keyone,year_month_day,number.events.sdc) %>%
   dplyr::rename(.,number.events.sdc_l1=number.events.sdc,
                 year_month_day_l1=year_month_day)
 
+#Merged lags data back into main data
 tableS2.all.partners.pcts <- left_join(tableS2.all.partners.pcts,
                                        tableS2.all.partners.pcts.l1,
                                       by=c("keyone","year_month_day_l1")) %>%
@@ -147,7 +152,7 @@ rm(tableS2.all.partners.pcts.l1)
 
 ## % reduction in activity in April 2020 vs. April 2019 (elective admissions, emergency outpatient, A&E and outpatient)
 
-### Pooled
+### Pooled (all five partners)
 
 ```{r apr.pct.change.pooled, echo=TRUE, message=FALSE, warning=FALSE}
 
@@ -195,7 +200,7 @@ drop.april %>%
 
 ## % of admissions that were COVID-related
 
-### Pooled
+### Pooled (all five partners)
 
 ```{r pct.covid.pooled, echo=TRUE, message=FALSE, warning=FALSE}
 
@@ -280,7 +285,7 @@ total.deaths %>%
 
 ## Cumulative mortality rate
 
-### Pooled
+### Pooled (all five partners)
 
 ```{r pooled.cum.deaths, echo=TRUE, message=FALSE, warning=FALSE}
 
@@ -322,7 +327,7 @@ total.deaths.cum %>%
 
 ### Elective admissions
 
-```{r, abs.elective, echo=FALSE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
+```{r, abs.elective, echo=TRUE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
 
 tableS1.all.partners %>%
   filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
@@ -338,7 +343,7 @@ tableS1.all.partners %>%
 
 ### Emergency admissions
 
-```{r, abs.emergency, echo=FALSE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
+```{r, abs.emergency, echo=TRUE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
 
 tableS1.all.partners %>%
   filter(.,!(ICD10.chapter %in% c("No match with ICD-10 chapters","22 - Codes for special purposes"))) %>%
@@ -354,7 +359,7 @@ tableS1.all.partners %>%
 
 ## General population comparison in North West London
 
-```{r, nwl.genpop, echo=FALSE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
+```{r, nwl.genpop, echo=TRUE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
 tableS2.all.partners %>%
   filter(.,!(breakdown.level %in% c("admissions_all","admissions_other"))) %>%
   filter(.,(year_month=="2020-02"|year_month=="2020-04")) %>%

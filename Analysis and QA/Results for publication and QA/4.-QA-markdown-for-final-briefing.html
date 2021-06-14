@@ -644,17 +644,17 @@ summary {
 <ul>
 <li><a href="#reading-in-data">Reading in data</a></li>
 <li><a href="#reduction-in-activity-in-april-2020-vs.-april-2019-elective-admissions-emergency-outpatient-ae-and-outpatient">% reduction in activity in April 2020 vs. April 2019 (elective admissions, emergency outpatient, A&amp;E and outpatient)</a><ul>
-<li><a href="#pooled">Pooled</a></li>
+<li><a href="#pooled-all-five-partners">Pooled (all five partners)</a></li>
 <li><a href="#by-partner">By partner</a></li>
 </ul></li>
 <li><a href="#of-admissions-that-were-covid-related">% of admissions that were COVID-related</a><ul>
-<li><a href="#pooled-1">Pooled</a></li>
+<li><a href="#pooled-all-five-partners-1">Pooled (all five partners)</a></li>
 <li><a href="#by-partner-1">By partner</a></li>
 </ul></li>
 <li><a href="#total-number-of-patients-with-covid">Total number of patients with COVID</a></li>
 <li><a href="#total-number-of-deaths">Total number of deaths</a></li>
 <li><a href="#cumulative-mortality-rate">Cumulative mortality rate</a><ul>
-<li><a href="#pooled-2">Pooled</a></li>
+<li><a href="#pooled-all-five-partners-2">Pooled (all five partners)</a></li>
 <li><a href="#all-partners">All partners</a></li>
 </ul></li>
 <li><a href="#changes-by-icd-10-chapter">Changes by ICD-10 chapter</a><ul>
@@ -690,6 +690,9 @@ month.lookup &lt;- data.frame(month.number=c(&quot;01&quot;,&quot;02&quot;,&quot
 ################# Service use statistics #################
 ##########################################################
 
+#Date on number of monthly admissions/attendances/other at each of the five NDL locations
+#It also includes data broken down by age band, sex and deprivation
+
 table1.all.partners &lt;- fread(&quot;Visualize data/Data/table1.all.partners.csv&quot;,
                              header=TRUE, sep=&quot;,&quot;, check.names=T) %&gt;%
   left_join(.,bl.orders,by=&quot;breakdown.level&quot;) %&gt;%
@@ -701,7 +704,7 @@ table1.all.partners &lt;- fread(&quot;Visualize data/Data/table1.all.partners.cs
 
 #Changes in service use data
 #This step creates a new column for each row of data (activity levels one year ago)
-#and computes the absolute and relative difference
+#and computes the absolute and relative difference (this month vs. same month a year algo)
 
 table1.all.partners.pcts &lt;-  table1.all.partners %&gt;%
   filter(., !(strata %in% c(&quot;unknown&quot;,&quot;unknown/other&quot;))) %&gt;%
@@ -718,7 +721,7 @@ table1.all.partners.pcts.l1 &lt;- table1.all.partners.pcts %&gt;%
   dplyr::rename(.,number.events.sdc_l1=number.events.sdc,
                 year_month_day_l1=year_month_day)
 
-#Merged back into main data
+#Merged lags data back into main data
 table1.all.partners.pcts &lt;- left_join(table1.all.partners.pcts,
                                       table1.all.partners.pcts.l1,
                                       by=c(&quot;keyone&quot;,&quot;year_month_day_l1&quot;)) %&gt;%
@@ -768,11 +771,13 @@ tableS2.all.partners.pcts &lt;-  tableS2.all.partners %&gt;%
   mutate(.,year_month_day_l1=lubridate::ymd(paste(year_l1,month,&quot;01&quot;,sep=&quot;-&quot;)),
          keyone=paste(partner,cohort,breakdown.level,sep=&quot;-&quot;))
 
+#Lags data
 tableS2.all.partners.pcts.l1 &lt;- tableS2.all.partners.pcts %&gt;%
   select(.,keyone,year_month_day,number.events.sdc) %&gt;%
   dplyr::rename(.,number.events.sdc_l1=number.events.sdc,
                 year_month_day_l1=year_month_day)
 
+#Merged lags data back into main data
 tableS2.all.partners.pcts &lt;- left_join(tableS2.all.partners.pcts,
                                        tableS2.all.partners.pcts.l1,
                                       by=c(&quot;keyone&quot;,&quot;year_month_day_l1&quot;)) %&gt;%
@@ -786,8 +791,8 @@ rm(tableS2.all.partners.pcts.l1)</code></pre>
 </div>
 <div id="reduction-in-activity-in-april-2020-vs.-april-2019-elective-admissions-emergency-outpatient-ae-and-outpatient" class="section level2">
 <h2>% reduction in activity in April 2020 vs. April 2019 (elective admissions, emergency outpatient, A&amp;E and outpatient)</h2>
-<div id="pooled" class="section level3">
-<h3>Pooled</h3>
+<div id="pooled-all-five-partners" class="section level3">
+<h3>Pooled (all five partners)</h3>
 <pre class="r"><code>pooled.drop.april &lt;- table1.all.partners.pcts %&gt;% 
   filter(.,strata==&quot;overall&quot;,year_month==&quot;2020-04&quot;,
          breakdown.level!=&quot;admissions_all&quot;) %&gt;%
@@ -1190,8 +1195,8 @@ Wales
 </div>
 <div id="of-admissions-that-were-covid-related" class="section level2">
 <h2>% of admissions that were COVID-related</h2>
-<div id="pooled-1" class="section level3">
-<h3>Pooled</h3>
+<div id="pooled-all-five-partners-1" class="section level3">
+<h3>Pooled (all five partners)</h3>
 <pre class="r"><code>covid.adm.data &lt;- table1.all.partners %&gt;%
   filter(.,strata==&quot;overall&quot;,breakdown.level==&quot;admissions_all&quot;,
     year_month&gt;=&quot;2020-03&quot;) %&gt;%
@@ -1416,8 +1421,8 @@ total_deaths
 </div>
 <div id="cumulative-mortality-rate" class="section level2">
 <h2>Cumulative mortality rate</h2>
-<div id="pooled-2" class="section level3">
-<h3>Pooled</h3>
+<div id="pooled-all-five-partners-2" class="section level3">
+<h3>Pooled (all five partners)</h3>
 <pre class="r"><code>total.deaths.cum.pooled &lt;- table3.all.partners %&gt;%
   filter(.,location==&quot;anywhere&quot;,breakdown.level==&quot;overall&quot;) %&gt;%
   select(.,location,year_month,partner,number.patients.sdc,total.patients) %&gt;%
@@ -1533,6 +1538,15 @@ Grampian
 <h2>Changes by ICD-10 chapter</h2>
 <div id="elective-admissions" class="section level3">
 <h3>Elective admissions</h3>
+<pre class="r"><code>tableS1.all.partners %&gt;%
+  filter(.,!(ICD10.chapter %in% c(&quot;No match with ICD-10 chapters&quot;,&quot;22 - Codes for special purposes&quot;))) %&gt;%
+  filter(.,type==&quot;elective&quot;,partner==&quot;Average&quot;) %&gt;%
+  select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %&gt;%
+  mutate(.,abs_change_2019_to_2020=(number.events.2020.sdc-number.events.2019.sdc),
+         pct_change_2019_to_2020=round((number.events.2020.sdc-number.events.2019.sdc)/number.events.2019.sdc*100,1)) %&gt;%
+  arrange(.,-number.events.2020.sdc) %&gt;%
+  kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
+  kable_styling()</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -1942,6 +1956,15 @@ Average
 </div>
 <div id="emergency-admissions" class="section level3">
 <h3>Emergency admissions</h3>
+<pre class="r"><code>tableS1.all.partners %&gt;%
+  filter(.,!(ICD10.chapter %in% c(&quot;No match with ICD-10 chapters&quot;,&quot;22 - Codes for special purposes&quot;))) %&gt;%
+  filter(.,type==&quot;emergency&quot;,partner==&quot;Average&quot;) %&gt;%
+  select(.,partner,ICD10.chapter,number.events.2019.sdc,number.events.2020.sdc) %&gt;%
+  mutate(.,abs_change_2019_to_2020=(number.events.2020.sdc-number.events.2019.sdc),
+         pct_change_2019_to_2020=round((number.events.2020.sdc-number.events.2019.sdc)/number.events.2019.sdc*100,1)) %&gt;%
+  arrange(.,-number.events.2020.sdc) %&gt;%
+  kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
+  kable_styling()</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2352,6 +2375,18 @@ Average
 </div>
 <div id="general-population-comparison-in-north-west-london" class="section level2">
 <h2>General population comparison in North West London</h2>
+<pre class="r"><code>tableS2.all.partners %&gt;%
+  filter(.,!(breakdown.level %in% c(&quot;admissions_all&quot;,&quot;admissions_other&quot;))) %&gt;%
+  filter(.,(year_month==&quot;2020-02&quot;|year_month==&quot;2020-04&quot;)) %&gt;%
+  mutate(.,year_month=ifelse(year_month==&quot;2020-02&quot;,&quot;feb20&quot;,&quot;apr20&quot;)) %&gt;%
+  select(.,breakdown.level,partner,cohort,year_month,number.events.sdc,total.patients,cases.per.100) %&gt;%
+  pivot_wider(.,names_from = year_month,
+              names_sep = &quot;.&quot;,
+              values_from = c(number.events.sdc,cases.per.100,total.patients)) %&gt;%
+  mutate(.,pct_change=(number.events.sdc.apr20-number.events.sdc.feb20)/number.events.sdc.feb20*100) %&gt;%
+  arrange(.,breakdown.level,cohort) %&gt;% 
+kable(.,digits=1,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
+  kable_styling(., full_width = F)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
