@@ -645,6 +645,7 @@ summary {
 <li><a href="#setup">Setup</a></li>
 <li><a href="#reading-in-data-and-data-cleaning">Reading in data and data cleaning</a></li>
 <li><a href="#peak-mortality-in-both-groups">Peak mortality in both groups</a></li>
+<li><a href="#number-dead-between-march-and-august-2020">Number dead between March and August 2020</a></li>
 <li><a href="#change-in-mortality-rate-between-23032020-and-02042020">Change in mortality rate between 23/03/2020 and 02/04/2020</a></li>
 </ul>
 </div>
@@ -687,16 +688,17 @@ numbers_only &lt;- function(x) !grepl(&quot;\\D&quot;, x)</code></pre>
 nhsdigital.mortality &lt;- fread(paste0(rawdatadir,&quot;Tracking Healthcare Activity and Outcomes for Shielded Patients, England, Open Data.csv&quot;),header=TRUE, sep=&quot;,&quot;, check.names=T) %&gt;%
   filter(.,Activity_type==&quot;Mortality&quot;,Breakdown==&quot;All&quot;,Rate!=&quot;NULL&quot;) %&gt;%
   mutate(.,Rate=as.numeric(Rate)) %&gt;%
-  select(.,Population_group,Breakdown,Date,Rate) %&gt;%
+  select(.,Population_group,Breakdown,Date,Rate,Numerator,Denominator) %&gt;%
   pivot_wider(
     names_from = Population_group,
     names_sep = &quot;.&quot;,
-    values_from = c(Rate)
+    values_from = c(Rate,Numerator,Denominator)
   ) %&gt;%
   mutate(.,Date=lubridate::dmy(Date)) %&gt;%
-  filter(.,Date&lt;=&quot;2020-07-31&quot;)
+  filter(.,Date&lt;=&quot;2020-08-30&quot;)
 
 nhsdigital.mortality %&gt;%
+  filter(.,Date&lt;=&quot;2020-07-31&quot;) %&gt;%
   head(.,n=10) %&gt;%
   kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
   kable_styling(., full_width = F)</code></pre>
@@ -710,10 +712,22 @@ Breakdown
 Date
 </th>
 <th style="text-align:right;">
-SPL
+Rate.SPL
 </th>
 <th style="text-align:right;">
-General population
+Rate.General population
+</th>
+<th style="text-align:left;">
+Numerator.SPL
+</th>
+<th style="text-align:left;">
+Numerator.General population
+</th>
+<th style="text-align:right;">
+Denominator.SPL
+</th>
+<th style="text-align:right;">
+Denominator.General population
 </th>
 </tr>
 </thead>
@@ -731,6 +745,18 @@ All
 <td style="text-align:right;">
 0.0073
 </td>
+<td style="text-align:left;">
+250
+</td>
+<td style="text-align:left;">
+80
+</td>
+<td style="text-align:right;">
+868,320
+</td>
+<td style="text-align:right;">
+999,760
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -744,6 +770,18 @@ All
 </td>
 <td style="text-align:right;">
 0.0077
+</td>
+<td style="text-align:left;">
+295
+</td>
+<td style="text-align:left;">
+75
+</td>
+<td style="text-align:right;">
+868,070
+</td>
+<td style="text-align:right;">
+999,680
 </td>
 </tr>
 <tr>
@@ -759,6 +797,18 @@ All
 <td style="text-align:right;">
 0.0078
 </td>
+<td style="text-align:left;">
+300
+</td>
+<td style="text-align:left;">
+65
+</td>
+<td style="text-align:right;">
+867,775
+</td>
+<td style="text-align:right;">
+999,610
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -772,6 +822,18 @@ All
 </td>
 <td style="text-align:right;">
 0.0086
+</td>
+<td style="text-align:left;">
+315
+</td>
+<td style="text-align:left;">
+90
+</td>
+<td style="text-align:right;">
+867,475
+</td>
+<td style="text-align:right;">
+999,545
 </td>
 </tr>
 <tr>
@@ -787,6 +849,18 @@ All
 <td style="text-align:right;">
 0.0091
 </td>
+<td style="text-align:left;">
+295
+</td>
+<td style="text-align:left;">
+100
+</td>
+<td style="text-align:right;">
+867,160
+</td>
+<td style="text-align:right;">
+999,455
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -800,6 +874,18 @@ All
 </td>
 <td style="text-align:right;">
 0.0095
+</td>
+<td style="text-align:left;">
+310
+</td>
+<td style="text-align:left;">
+80
+</td>
+<td style="text-align:right;">
+866,865
+</td>
+<td style="text-align:right;">
+999,355
 </td>
 </tr>
 <tr>
@@ -815,6 +901,18 @@ All
 <td style="text-align:right;">
 0.0100
 </td>
+<td style="text-align:left;">
+295
+</td>
+<td style="text-align:left;">
+115
+</td>
+<td style="text-align:right;">
+866,555
+</td>
+<td style="text-align:right;">
+999,275
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -828,6 +926,18 @@ All
 </td>
 <td style="text-align:right;">
 0.0102
+</td>
+<td style="text-align:left;">
+325
+</td>
+<td style="text-align:left;">
+115
+</td>
+<td style="text-align:right;">
+866,260
+</td>
+<td style="text-align:right;">
+999,160
 </td>
 </tr>
 <tr>
@@ -843,6 +953,18 @@ All
 <td style="text-align:right;">
 0.0105
 </td>
+<td style="text-align:left;">
+315
+</td>
+<td style="text-align:left;">
+100
+</td>
+<td style="text-align:right;">
+865,940
+</td>
+<td style="text-align:right;">
+999,045
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -857,6 +979,18 @@ All
 <td style="text-align:right;">
 0.0115
 </td>
+<td style="text-align:left;">
+350
+</td>
+<td style="text-align:left;">
+100
+</td>
+<td style="text-align:right;">
+865,620
+</td>
+<td style="text-align:right;">
+998,945
+</td>
 </tr>
 </tbody>
 </table>
@@ -864,7 +998,8 @@ All
 <div id="peak-mortality-in-both-groups" class="section level2">
 <h2>Peak mortality in both groups</h2>
 <pre class="r"><code>nhsdigital.mortality %&gt;%
-  slice_max(SPL,n=1) %&gt;%
+  filter(.,Date&lt;=&quot;2020-07-31&quot;) %&gt;%
+  slice_max(Rate.SPL,n=1) %&gt;%
   kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
   kable_styling(., full_width = F)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -877,10 +1012,22 @@ Breakdown
 Date
 </th>
 <th style="text-align:right;">
-SPL
+Rate.SPL
 </th>
 <th style="text-align:right;">
-General population
+Rate.General population
+</th>
+<th style="text-align:left;">
+Numerator.SPL
+</th>
+<th style="text-align:left;">
+Numerator.General population
+</th>
+<th style="text-align:right;">
+Denominator.SPL
+</th>
+<th style="text-align:right;">
+Denominator.General population
 </th>
 </tr>
 </thead>
@@ -898,11 +1045,24 @@ All
 <td style="text-align:right;">
 0.0117
 </td>
+<td style="text-align:left;">
+360
+</td>
+<td style="text-align:left;">
+110
+</td>
+<td style="text-align:right;">
+865,270
+</td>
+<td style="text-align:right;">
+998,845
+</td>
 </tr>
 </tbody>
 </table>
 <pre class="r"><code>nhsdigital.mortality %&gt;%
-  slice_max(`General population`,n=1) %&gt;%
+  filter(.,Date&lt;=&quot;2020-07-31&quot;) %&gt;%
+  slice_max(`Rate.General population`,n=1) %&gt;%
   slice_min(.,Date) %&gt;%
   kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
   kable_styling(., full_width = F)</code></pre>
@@ -916,10 +1076,22 @@ Breakdown
 Date
 </th>
 <th style="text-align:right;">
-SPL
+Rate.SPL
 </th>
 <th style="text-align:right;">
-General population
+Rate.General population
+</th>
+<th style="text-align:left;">
+Numerator.SPL
+</th>
+<th style="text-align:left;">
+Numerator.General population
+</th>
+<th style="text-align:right;">
+Denominator.SPL
+</th>
+<th style="text-align:right;">
+Denominator.General population
 </th>
 </tr>
 </thead>
@@ -937,6 +1109,43 @@ All
 <td style="text-align:right;">
 0.0143
 </td>
+<td style="text-align:left;">
+470
+</td>
+<td style="text-align:left;">
+165
+</td>
+<td style="text-align:right;">
+1,277,050
+</td>
+<td style="text-align:right;">
+997,515
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="number-dead-between-march-and-august-2020" class="section level2">
+<h2>Number dead between March and August 2020</h2>
+<pre class="r"><code>nhsdigital.mortality %&gt;%
+  pull(.,Numerator.SPL) %&gt;%
+  as.numeric() %&gt;%
+  sum(.) %&gt;%
+  kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
+  kable_styling(., full_width = F)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+50,635
+</td>
 </tr>
 </tbody>
 </table>
@@ -945,32 +1154,30 @@ All
 <h2>Change in mortality rate between 23/03/2020 and 02/04/2020</h2>
 <pre class="r"><code>nhsdigital.mortality %&gt;%
   filter(.,Date %in% as.Date(c(&quot;2020-03-23&quot;,&quot;2020-04-02&quot;))) %&gt;%
+  select(.,Date,Rate.SPL,`Rate.General population`) %&gt;%
   pivot_wider(
     names_from = Date,
     names_sep = &quot;.&quot;,
-    values_from = c(SPL,`General population`)
+    values_from = c(`Rate.SPL`,`Rate.General population`)
   ) %&gt;%
-  mutate(.,pct_increase_SPL=(`SPL.2020-04-02`-`SPL.2020-03-23`)/`SPL.2020-03-23`*100,
-         pct_increase_gen_pop=(`General population.2020-04-02`-`General population.2020-03-23`)/`General population.2020-03-23`*100) %&gt;%
+  mutate(.,pct_increase_SPL=(`Rate.SPL.2020-04-02`-`Rate.SPL.2020-03-23`)/`Rate.SPL.2020-03-23`*100,
+         pct_increase_gen_pop=(`Rate.General population.2020-04-02`-`Rate.General population.2020-03-23`)/`Rate.General population.2020-03-23`*100) %&gt;%
   kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
   kable_styling(., full_width = F)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
-<th style="text-align:left;">
-Breakdown
+<th style="text-align:right;">
+Rate.SPL.2020-03-23
 </th>
 <th style="text-align:right;">
-SPL.2020-03-23
+Rate.SPL.2020-04-02
 </th>
 <th style="text-align:right;">
-SPL.2020-04-02
+Rate.General population.2020-03-23
 </th>
 <th style="text-align:right;">
-General population.2020-03-23
-</th>
-<th style="text-align:right;">
-General population.2020-04-02
+Rate.General population.2020-04-02
 </th>
 <th style="text-align:right;">
 pct_increase_SPL
@@ -982,9 +1189,6 @@ pct_increase_gen_pop
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
-All
-</td>
 <td style="text-align:right;">
 0.0316
 </td>
