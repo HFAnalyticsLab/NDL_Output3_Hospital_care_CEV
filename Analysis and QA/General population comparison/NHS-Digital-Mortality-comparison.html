@@ -644,6 +644,7 @@ summary {
 <ul>
 <li><a href="#setup">Setup</a></li>
 <li><a href="#reading-in-data-and-data-cleaning">Reading in data and data cleaning</a></li>
+<li><a href="#comparison-of-rates-during-first-wave">Comparison of rates during first wave</a></li>
 <li><a href="#peak-mortality-in-both-groups">Peak mortality in both groups</a></li>
 <li><a href="#number-dead-between-march-and-august-2020">Number dead between March and August 2020</a></li>
 <li><a href="#change-in-mortality-rate-between-23032020-and-02042020">Change in mortality rate between 23/03/2020 and 02/04/2020</a></li>
@@ -990,6 +991,2266 @@ All
 </td>
 <td style="text-align:right;">
 998,945
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="comparison-of-rates-during-first-wave" class="section level2">
+<h2>Comparison of rates during first wave</h2>
+<pre class="r"><code>nhsdigital.mortality %&gt;%
+  filter(.,Date&lt;=&quot;2020-07-31&quot;) %&gt;%
+  mutate(.,Rate_SPL_over_GenPop=Rate.SPL/`Rate.General population`) %&gt;%
+  mutate(.,more_twice=ifelse(Rate_SPL_over_GenPop&gt;=2,1,0)) %&gt;%
+  select(.,Date,Rate.SPL,`Rate.General population`,Rate_SPL_over_GenPop,more_twice) %&gt;%
+  kable(.,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
+  kable_styling(., full_width = F)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:right;">
+Rate.SPL
+</th>
+<th style="text-align:right;">
+Rate.General population
+</th>
+<th style="text-align:right;">
+Rate_SPL_over_GenPop
+</th>
+<th style="text-align:right;">
+more_twice
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2020-03-23
+</td>
+<td style="text-align:right;">
+0.0316
+</td>
+<td style="text-align:right;">
+0.0073
+</td>
+<td style="text-align:right;">
+4.328767
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-24
+</td>
+<td style="text-align:right;">
+0.0324
+</td>
+<td style="text-align:right;">
+0.0077
+</td>
+<td style="text-align:right;">
+4.207792
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-25
+</td>
+<td style="text-align:right;">
+0.0336
+</td>
+<td style="text-align:right;">
+0.0078
+</td>
+<td style="text-align:right;">
+4.307692
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-26
+</td>
+<td style="text-align:right;">
+0.0339
+</td>
+<td style="text-align:right;">
+0.0086
+</td>
+<td style="text-align:right;">
+3.941861
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-27
+</td>
+<td style="text-align:right;">
+0.0351
+</td>
+<td style="text-align:right;">
+0.0091
+</td>
+<td style="text-align:right;">
+3.857143
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-28
+</td>
+<td style="text-align:right;">
+0.0355
+</td>
+<td style="text-align:right;">
+0.0095
+</td>
+<td style="text-align:right;">
+3.736842
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-29
+</td>
+<td style="text-align:right;">
+0.0364
+</td>
+<td style="text-align:right;">
+0.0100
+</td>
+<td style="text-align:right;">
+3.640000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-30
+</td>
+<td style="text-align:right;">
+0.0371
+</td>
+<td style="text-align:right;">
+0.0102
+</td>
+<td style="text-align:right;">
+3.637255
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-03-31
+</td>
+<td style="text-align:right;">
+0.0381
+</td>
+<td style="text-align:right;">
+0.0105
+</td>
+<td style="text-align:right;">
+3.628571
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-01
+</td>
+<td style="text-align:right;">
+0.0392
+</td>
+<td style="text-align:right;">
+0.0115
+</td>
+<td style="text-align:right;">
+3.408696
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-02
+</td>
+<td style="text-align:right;">
+0.0395
+</td>
+<td style="text-align:right;">
+0.0117
+</td>
+<td style="text-align:right;">
+3.376068
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-03
+</td>
+<td style="text-align:right;">
+0.0393
+</td>
+<td style="text-align:right;">
+0.0118
+</td>
+<td style="text-align:right;">
+3.330509
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-04
+</td>
+<td style="text-align:right;">
+0.0393
+</td>
+<td style="text-align:right;">
+0.0123
+</td>
+<td style="text-align:right;">
+3.195122
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-05
+</td>
+<td style="text-align:right;">
+0.0392
+</td>
+<td style="text-align:right;">
+0.0127
+</td>
+<td style="text-align:right;">
+3.086614
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-06
+</td>
+<td style="text-align:right;">
+0.0389
+</td>
+<td style="text-align:right;">
+0.0131
+</td>
+<td style="text-align:right;">
+2.969466
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-07
+</td>
+<td style="text-align:right;">
+0.0387
+</td>
+<td style="text-align:right;">
+0.0136
+</td>
+<td style="text-align:right;">
+2.845588
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-08
+</td>
+<td style="text-align:right;">
+0.0382
+</td>
+<td style="text-align:right;">
+0.0137
+</td>
+<td style="text-align:right;">
+2.788321
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-09
+</td>
+<td style="text-align:right;">
+0.0382
+</td>
+<td style="text-align:right;">
+0.0142
+</td>
+<td style="text-align:right;">
+2.690141
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-10
+</td>
+<td style="text-align:right;">
+0.0376
+</td>
+<td style="text-align:right;">
+0.0141
+</td>
+<td style="text-align:right;">
+2.666667
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-11
+</td>
+<td style="text-align:right;">
+0.0365
+</td>
+<td style="text-align:right;">
+0.0140
+</td>
+<td style="text-align:right;">
+2.607143
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-12
+</td>
+<td style="text-align:right;">
+0.0355
+</td>
+<td style="text-align:right;">
+0.0143
+</td>
+<td style="text-align:right;">
+2.482518
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-13
+</td>
+<td style="text-align:right;">
+0.0348
+</td>
+<td style="text-align:right;">
+0.0143
+</td>
+<td style="text-align:right;">
+2.433566
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-14
+</td>
+<td style="text-align:right;">
+0.0341
+</td>
+<td style="text-align:right;">
+0.0143
+</td>
+<td style="text-align:right;">
+2.384615
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-15
+</td>
+<td style="text-align:right;">
+0.0332
+</td>
+<td style="text-align:right;">
+0.0137
+</td>
+<td style="text-align:right;">
+2.423358
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-16
+</td>
+<td style="text-align:right;">
+0.0329
+</td>
+<td style="text-align:right;">
+0.0130
+</td>
+<td style="text-align:right;">
+2.530769
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-17
+</td>
+<td style="text-align:right;">
+0.0329
+</td>
+<td style="text-align:right;">
+0.0128
+</td>
+<td style="text-align:right;">
+2.570312
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-18
+</td>
+<td style="text-align:right;">
+0.0329
+</td>
+<td style="text-align:right;">
+0.0125
+</td>
+<td style="text-align:right;">
+2.632000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-19
+</td>
+<td style="text-align:right;">
+0.0327
+</td>
+<td style="text-align:right;">
+0.0121
+</td>
+<td style="text-align:right;">
+2.702479
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-20
+</td>
+<td style="text-align:right;">
+0.0323
+</td>
+<td style="text-align:right;">
+0.0120
+</td>
+<td style="text-align:right;">
+2.691667
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-21
+</td>
+<td style="text-align:right;">
+0.0317
+</td>
+<td style="text-align:right;">
+0.0112
+</td>
+<td style="text-align:right;">
+2.830357
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-22
+</td>
+<td style="text-align:right;">
+0.0307
+</td>
+<td style="text-align:right;">
+0.0109
+</td>
+<td style="text-align:right;">
+2.816514
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-23
+</td>
+<td style="text-align:right;">
+0.0297
+</td>
+<td style="text-align:right;">
+0.0106
+</td>
+<td style="text-align:right;">
+2.801887
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-24
+</td>
+<td style="text-align:right;">
+0.0289
+</td>
+<td style="text-align:right;">
+0.0103
+</td>
+<td style="text-align:right;">
+2.805825
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-25
+</td>
+<td style="text-align:right;">
+0.0285
+</td>
+<td style="text-align:right;">
+0.0099
+</td>
+<td style="text-align:right;">
+2.878788
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-26
+</td>
+<td style="text-align:right;">
+0.0277
+</td>
+<td style="text-align:right;">
+0.0096
+</td>
+<td style="text-align:right;">
+2.885417
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-27
+</td>
+<td style="text-align:right;">
+0.0273
+</td>
+<td style="text-align:right;">
+0.0091
+</td>
+<td style="text-align:right;">
+3.000000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-28
+</td>
+<td style="text-align:right;">
+0.0271
+</td>
+<td style="text-align:right;">
+0.0089
+</td>
+<td style="text-align:right;">
+3.044944
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-29
+</td>
+<td style="text-align:right;">
+0.0270
+</td>
+<td style="text-align:right;">
+0.0087
+</td>
+<td style="text-align:right;">
+3.103448
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-04-30
+</td>
+<td style="text-align:right;">
+0.0267
+</td>
+<td style="text-align:right;">
+0.0085
+</td>
+<td style="text-align:right;">
+3.141176
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-01
+</td>
+<td style="text-align:right;">
+0.0263
+</td>
+<td style="text-align:right;">
+0.0086
+</td>
+<td style="text-align:right;">
+3.058139
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-02
+</td>
+<td style="text-align:right;">
+0.0261
+</td>
+<td style="text-align:right;">
+0.0085
+</td>
+<td style="text-align:right;">
+3.070588
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-03
+</td>
+<td style="text-align:right;">
+0.0258
+</td>
+<td style="text-align:right;">
+0.0081
+</td>
+<td style="text-align:right;">
+3.185185
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-04
+</td>
+<td style="text-align:right;">
+0.0254
+</td>
+<td style="text-align:right;">
+0.0080
+</td>
+<td style="text-align:right;">
+3.175000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-05
+</td>
+<td style="text-align:right;">
+0.0249
+</td>
+<td style="text-align:right;">
+0.0079
+</td>
+<td style="text-align:right;">
+3.151899
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-06
+</td>
+<td style="text-align:right;">
+0.0248
+</td>
+<td style="text-align:right;">
+0.0078
+</td>
+<td style="text-align:right;">
+3.179487
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-07
+</td>
+<td style="text-align:right;">
+0.0246
+</td>
+<td style="text-align:right;">
+0.0077
+</td>
+<td style="text-align:right;">
+3.194805
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-08
+</td>
+<td style="text-align:right;">
+0.0239
+</td>
+<td style="text-align:right;">
+0.0074
+</td>
+<td style="text-align:right;">
+3.229730
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-09
+</td>
+<td style="text-align:right;">
+0.0236
+</td>
+<td style="text-align:right;">
+0.0071
+</td>
+<td style="text-align:right;">
+3.323944
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-10
+</td>
+<td style="text-align:right;">
+0.0231
+</td>
+<td style="text-align:right;">
+0.0069
+</td>
+<td style="text-align:right;">
+3.347826
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-11
+</td>
+<td style="text-align:right;">
+0.0225
+</td>
+<td style="text-align:right;">
+0.0065
+</td>
+<td style="text-align:right;">
+3.461539
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-12
+</td>
+<td style="text-align:right;">
+0.0223
+</td>
+<td style="text-align:right;">
+0.0064
+</td>
+<td style="text-align:right;">
+3.484375
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-13
+</td>
+<td style="text-align:right;">
+0.0220
+</td>
+<td style="text-align:right;">
+0.0063
+</td>
+<td style="text-align:right;">
+3.492063
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-14
+</td>
+<td style="text-align:right;">
+0.0216
+</td>
+<td style="text-align:right;">
+0.0063
+</td>
+<td style="text-align:right;">
+3.428571
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-15
+</td>
+<td style="text-align:right;">
+0.0220
+</td>
+<td style="text-align:right;">
+0.0063
+</td>
+<td style="text-align:right;">
+3.492063
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-16
+</td>
+<td style="text-align:right;">
+0.0219
+</td>
+<td style="text-align:right;">
+0.0067
+</td>
+<td style="text-align:right;">
+3.268657
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-17
+</td>
+<td style="text-align:right;">
+0.0217
+</td>
+<td style="text-align:right;">
+0.0068
+</td>
+<td style="text-align:right;">
+3.191177
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-18
+</td>
+<td style="text-align:right;">
+0.0220
+</td>
+<td style="text-align:right;">
+0.0068
+</td>
+<td style="text-align:right;">
+3.235294
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-19
+</td>
+<td style="text-align:right;">
+0.0215
+</td>
+<td style="text-align:right;">
+0.0066
+</td>
+<td style="text-align:right;">
+3.257576
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-20
+</td>
+<td style="text-align:right;">
+0.0212
+</td>
+<td style="text-align:right;">
+0.0066
+</td>
+<td style="text-align:right;">
+3.212121
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-21
+</td>
+<td style="text-align:right;">
+0.0205
+</td>
+<td style="text-align:right;">
+0.0063
+</td>
+<td style="text-align:right;">
+3.253968
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-22
+</td>
+<td style="text-align:right;">
+0.0200
+</td>
+<td style="text-align:right;">
+0.0064
+</td>
+<td style="text-align:right;">
+3.125000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-23
+</td>
+<td style="text-align:right;">
+0.0197
+</td>
+<td style="text-align:right;">
+0.0061
+</td>
+<td style="text-align:right;">
+3.229508
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-24
+</td>
+<td style="text-align:right;">
+0.0196
+</td>
+<td style="text-align:right;">
+0.0061
+</td>
+<td style="text-align:right;">
+3.213115
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-25
+</td>
+<td style="text-align:right;">
+0.0192
+</td>
+<td style="text-align:right;">
+0.0061
+</td>
+<td style="text-align:right;">
+3.147541
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-26
+</td>
+<td style="text-align:right;">
+0.0191
+</td>
+<td style="text-align:right;">
+0.0060
+</td>
+<td style="text-align:right;">
+3.183333
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-27
+</td>
+<td style="text-align:right;">
+0.0191
+</td>
+<td style="text-align:right;">
+0.0060
+</td>
+<td style="text-align:right;">
+3.183333
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-28
+</td>
+<td style="text-align:right;">
+0.0195
+</td>
+<td style="text-align:right;">
+0.0061
+</td>
+<td style="text-align:right;">
+3.196721
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-29
+</td>
+<td style="text-align:right;">
+0.0193
+</td>
+<td style="text-align:right;">
+0.0059
+</td>
+<td style="text-align:right;">
+3.271186
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-30
+</td>
+<td style="text-align:right;">
+0.0196
+</td>
+<td style="text-align:right;">
+0.0059
+</td>
+<td style="text-align:right;">
+3.322034
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-05-31
+</td>
+<td style="text-align:right;">
+0.0199
+</td>
+<td style="text-align:right;">
+0.0058
+</td>
+<td style="text-align:right;">
+3.431034
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-01
+</td>
+<td style="text-align:right;">
+0.0199
+</td>
+<td style="text-align:right;">
+0.0058
+</td>
+<td style="text-align:right;">
+3.431034
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-02
+</td>
+<td style="text-align:right;">
+0.0201
+</td>
+<td style="text-align:right;">
+0.0059
+</td>
+<td style="text-align:right;">
+3.406780
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-03
+</td>
+<td style="text-align:right;">
+0.0201
+</td>
+<td style="text-align:right;">
+0.0058
+</td>
+<td style="text-align:right;">
+3.465517
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-04
+</td>
+<td style="text-align:right;">
+0.0203
+</td>
+<td style="text-align:right;">
+0.0056
+</td>
+<td style="text-align:right;">
+3.625000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-05
+</td>
+<td style="text-align:right;">
+0.0204
+</td>
+<td style="text-align:right;">
+0.0057
+</td>
+<td style="text-align:right;">
+3.578947
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-06
+</td>
+<td style="text-align:right;">
+0.0201
+</td>
+<td style="text-align:right;">
+0.0058
+</td>
+<td style="text-align:right;">
+3.465517
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-07
+</td>
+<td style="text-align:right;">
+0.0199
+</td>
+<td style="text-align:right;">
+0.0057
+</td>
+<td style="text-align:right;">
+3.491228
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-08
+</td>
+<td style="text-align:right;">
+0.0198
+</td>
+<td style="text-align:right;">
+0.0061
+</td>
+<td style="text-align:right;">
+3.245902
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-09
+</td>
+<td style="text-align:right;">
+0.0197
+</td>
+<td style="text-align:right;">
+0.0060
+</td>
+<td style="text-align:right;">
+3.283333
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-10
+</td>
+<td style="text-align:right;">
+0.0198
+</td>
+<td style="text-align:right;">
+0.0061
+</td>
+<td style="text-align:right;">
+3.245902
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-11
+</td>
+<td style="text-align:right;">
+0.0195
+</td>
+<td style="text-align:right;">
+0.0063
+</td>
+<td style="text-align:right;">
+3.095238
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-12
+</td>
+<td style="text-align:right;">
+0.0197
+</td>
+<td style="text-align:right;">
+0.0060
+</td>
+<td style="text-align:right;">
+3.283333
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-13
+</td>
+<td style="text-align:right;">
+0.0200
+</td>
+<td style="text-align:right;">
+0.0058
+</td>
+<td style="text-align:right;">
+3.448276
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-14
+</td>
+<td style="text-align:right;">
+0.0196
+</td>
+<td style="text-align:right;">
+0.0056
+</td>
+<td style="text-align:right;">
+3.500000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-15
+</td>
+<td style="text-align:right;">
+0.0195
+</td>
+<td style="text-align:right;">
+0.0053
+</td>
+<td style="text-align:right;">
+3.679245
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-16
+</td>
+<td style="text-align:right;">
+0.0193
+</td>
+<td style="text-align:right;">
+0.0053
+</td>
+<td style="text-align:right;">
+3.641509
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-17
+</td>
+<td style="text-align:right;">
+0.0192
+</td>
+<td style="text-align:right;">
+0.0053
+</td>
+<td style="text-align:right;">
+3.622641
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-18
+</td>
+<td style="text-align:right;">
+0.0189
+</td>
+<td style="text-align:right;">
+0.0050
+</td>
+<td style="text-align:right;">
+3.780000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-19
+</td>
+<td style="text-align:right;">
+0.0185
+</td>
+<td style="text-align:right;">
+0.0050
+</td>
+<td style="text-align:right;">
+3.700000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-20
+</td>
+<td style="text-align:right;">
+0.0182
+</td>
+<td style="text-align:right;">
+0.0050
+</td>
+<td style="text-align:right;">
+3.640000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-21
+</td>
+<td style="text-align:right;">
+0.0186
+</td>
+<td style="text-align:right;">
+0.0052
+</td>
+<td style="text-align:right;">
+3.576923
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-22
+</td>
+<td style="text-align:right;">
+0.0192
+</td>
+<td style="text-align:right;">
+0.0051
+</td>
+<td style="text-align:right;">
+3.764706
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-23
+</td>
+<td style="text-align:right;">
+0.0196
+</td>
+<td style="text-align:right;">
+0.0051
+</td>
+<td style="text-align:right;">
+3.843137
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-24
+</td>
+<td style="text-align:right;">
+0.0195
+</td>
+<td style="text-align:right;">
+0.0051
+</td>
+<td style="text-align:right;">
+3.823529
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-25
+</td>
+<td style="text-align:right;">
+0.0195
+</td>
+<td style="text-align:right;">
+0.0053
+</td>
+<td style="text-align:right;">
+3.679245
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-26
+</td>
+<td style="text-align:right;">
+0.0194
+</td>
+<td style="text-align:right;">
+0.0054
+</td>
+<td style="text-align:right;">
+3.592593
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-27
+</td>
+<td style="text-align:right;">
+0.0192
+</td>
+<td style="text-align:right;">
+0.0054
+</td>
+<td style="text-align:right;">
+3.555556
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-28
+</td>
+<td style="text-align:right;">
+0.0188
+</td>
+<td style="text-align:right;">
+0.0053
+</td>
+<td style="text-align:right;">
+3.547170
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-29
+</td>
+<td style="text-align:right;">
+0.0180
+</td>
+<td style="text-align:right;">
+0.0054
+</td>
+<td style="text-align:right;">
+3.333333
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-06-30
+</td>
+<td style="text-align:right;">
+0.0178
+</td>
+<td style="text-align:right;">
+0.0052
+</td>
+<td style="text-align:right;">
+3.423077
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-01
+</td>
+<td style="text-align:right;">
+0.0176
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.591837
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-02
+</td>
+<td style="text-align:right;">
+0.0175
+</td>
+<td style="text-align:right;">
+0.0048
+</td>
+<td style="text-align:right;">
+3.645833
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-03
+</td>
+<td style="text-align:right;">
+0.0177
+</td>
+<td style="text-align:right;">
+0.0046
+</td>
+<td style="text-align:right;">
+3.847826
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-04
+</td>
+<td style="text-align:right;">
+0.0175
+</td>
+<td style="text-align:right;">
+0.0045
+</td>
+<td style="text-align:right;">
+3.888889
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-05
+</td>
+<td style="text-align:right;">
+0.0175
+</td>
+<td style="text-align:right;">
+0.0047
+</td>
+<td style="text-align:right;">
+3.723404
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-06
+</td>
+<td style="text-align:right;">
+0.0179
+</td>
+<td style="text-align:right;">
+0.0048
+</td>
+<td style="text-align:right;">
+3.729167
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-07
+</td>
+<td style="text-align:right;">
+0.0176
+</td>
+<td style="text-align:right;">
+0.0047
+</td>
+<td style="text-align:right;">
+3.744681
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-08
+</td>
+<td style="text-align:right;">
+0.0178
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.632653
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-09
+</td>
+<td style="text-align:right;">
+0.0180
+</td>
+<td style="text-align:right;">
+0.0046
+</td>
+<td style="text-align:right;">
+3.913044
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-10
+</td>
+<td style="text-align:right;">
+0.0182
+</td>
+<td style="text-align:right;">
+0.0048
+</td>
+<td style="text-align:right;">
+3.791667
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-11
+</td>
+<td style="text-align:right;">
+0.0184
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.755102
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-12
+</td>
+<td style="text-align:right;">
+0.0186
+</td>
+<td style="text-align:right;">
+0.0047
+</td>
+<td style="text-align:right;">
+3.957447
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-13
+</td>
+<td style="text-align:right;">
+0.0183
+</td>
+<td style="text-align:right;">
+0.0046
+</td>
+<td style="text-align:right;">
+3.978261
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-14
+</td>
+<td style="text-align:right;">
+0.0185
+</td>
+<td style="text-align:right;">
+0.0047
+</td>
+<td style="text-align:right;">
+3.936170
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-15
+</td>
+<td style="text-align:right;">
+0.0188
+</td>
+<td style="text-align:right;">
+0.0047
+</td>
+<td style="text-align:right;">
+4.000000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-16
+</td>
+<td style="text-align:right;">
+0.0187
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.816327
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-17
+</td>
+<td style="text-align:right;">
+0.0184
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.755102
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-18
+</td>
+<td style="text-align:right;">
+0.0182
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.714286
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-19
+</td>
+<td style="text-align:right;">
+0.0181
+</td>
+<td style="text-align:right;">
+0.0052
+</td>
+<td style="text-align:right;">
+3.480769
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-20
+</td>
+<td style="text-align:right;">
+0.0184
+</td>
+<td style="text-align:right;">
+0.0051
+</td>
+<td style="text-align:right;">
+3.607843
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-21
+</td>
+<td style="text-align:right;">
+0.0184
+</td>
+<td style="text-align:right;">
+0.0051
+</td>
+<td style="text-align:right;">
+3.607843
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-22
+</td>
+<td style="text-align:right;">
+0.0182
+</td>
+<td style="text-align:right;">
+0.0051
+</td>
+<td style="text-align:right;">
+3.568627
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-23
+</td>
+<td style="text-align:right;">
+0.0180
+</td>
+<td style="text-align:right;">
+0.0050
+</td>
+<td style="text-align:right;">
+3.600000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-24
+</td>
+<td style="text-align:right;">
+0.0180
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.673469
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-25
+</td>
+<td style="text-align:right;">
+0.0178
+</td>
+<td style="text-align:right;">
+0.0052
+</td>
+<td style="text-align:right;">
+3.423077
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-26
+</td>
+<td style="text-align:right;">
+0.0176
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.591837
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-27
+</td>
+<td style="text-align:right;">
+0.0175
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.571429
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-28
+</td>
+<td style="text-align:right;">
+0.0177
+</td>
+<td style="text-align:right;">
+0.0050
+</td>
+<td style="text-align:right;">
+3.540000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-29
+</td>
+<td style="text-align:right;">
+0.0174
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.551020
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-30
+</td>
+<td style="text-align:right;">
+0.0177
+</td>
+<td style="text-align:right;">
+0.0048
+</td>
+<td style="text-align:right;">
+3.687500
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2020-07-31
+</td>
+<td style="text-align:right;">
+0.0179
+</td>
+<td style="text-align:right;">
+0.0049
+</td>
+<td style="text-align:right;">
+3.653061
+</td>
+<td style="text-align:right;">
+1
 </td>
 </tr>
 </tbody>

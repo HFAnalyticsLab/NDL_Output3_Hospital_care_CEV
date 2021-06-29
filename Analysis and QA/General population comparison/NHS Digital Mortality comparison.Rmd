@@ -64,6 +64,18 @@ nhsdigital.mortality %>%
   kable_styling(., full_width = F)
 ```
 
+## Comparison of rates during first wave
+
+```{r ratecomp, echo=TRUE}
+nhsdigital.mortality %>%
+  filter(.,Date<="2020-07-31") %>%
+  mutate(.,Rate_SPL_over_GenPop=Rate.SPL/`Rate.General population`) %>%
+  mutate(.,more_twice=ifelse(Rate_SPL_over_GenPop>=2,1,0)) %>%
+  select(.,Date,Rate.SPL,`Rate.General population`,Rate_SPL_over_GenPop,more_twice) %>%
+  kable(.,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+```
+
 ## Peak mortality in both groups
 
 ```{r peaks, echo=TRUE}
