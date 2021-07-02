@@ -2383,9 +2383,9 @@ Average
   pivot_wider(.,names_from = year_month,
               names_sep = &quot;.&quot;,
               values_from = c(number.events.sdc,cases.per.100,total.patients)) %&gt;%
-  mutate(.,pct_change=(number.events.sdc.apr20-number.events.sdc.feb20)/number.events.sdc.feb20*100) %&gt;%
+  mutate(.,pct_change_rate=(cases.per.100.apr20 - cases.per.100.feb20   )/cases.per.100.feb20*100) %&gt;%
   arrange(.,breakdown.level,cohort) %&gt;% 
-kable(.,digits=1,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
+kable(.,digits=2,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
   kable_styling(., full_width = F)</code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
@@ -2418,7 +2418,7 @@ total.patients.feb20
 total.patients.apr20
 </th>
 <th style="text-align:right;">
-pct_change
+pct_change_rate
 </th>
 </tr>
 </thead>
@@ -2440,19 +2440,19 @@ Non SPL
 1,413
 </td>
 <td style="text-align:right;">
-0.5
+0.54
 </td>
 <td style="text-align:right;">
-0.1
-</td>
-<td style="text-align:right;">
-2,527,743
+0.06
 </td>
 <td style="text-align:right;">
 2,527,743
 </td>
 <td style="text-align:right;">
--89.6
+2,527,743
+</td>
+<td style="text-align:right;">
+-89.64
 </td>
 </tr>
 <tr>
@@ -2472,19 +2472,19 @@ SPL
 3,116
 </td>
 <td style="text-align:right;">
-8.8
+8.77
 </td>
 <td style="text-align:right;">
-2.8
-</td>
-<td style="text-align:right;">
-112,134
+2.78
 </td>
 <td style="text-align:right;">
 112,134
 </td>
 <td style="text-align:right;">
--68.3
+112,134
+</td>
+<td style="text-align:right;">
+-68.33
 </td>
 </tr>
 <tr>
@@ -2504,19 +2504,19 @@ Non SPL
 4,652
 </td>
 <td style="text-align:right;">
-0.4
+0.38
 </td>
 <td style="text-align:right;">
-0.2
-</td>
-<td style="text-align:right;">
-2,527,743
+0.18
 </td>
 <td style="text-align:right;">
 2,527,743
 </td>
 <td style="text-align:right;">
--52.1
+2,527,743
+</td>
+<td style="text-align:right;">
+-52.13
 </td>
 </tr>
 <tr>
@@ -2536,19 +2536,19 @@ SPL
 2,658
 </td>
 <td style="text-align:right;">
-4.3
+4.28
 </td>
 <td style="text-align:right;">
-2.4
-</td>
-<td style="text-align:right;">
-112,134
+2.37
 </td>
 <td style="text-align:right;">
 112,134
 </td>
 <td style="text-align:right;">
--44.6
+112,134
+</td>
+<td style="text-align:right;">
+-44.59
 </td>
 </tr>
 <tr>
@@ -2568,19 +2568,19 @@ Non SPL
 25,482
 </td>
 <td style="text-align:right;">
-2.7
+2.70
 </td>
 <td style="text-align:right;">
-1.0
-</td>
-<td style="text-align:right;">
-2,527,743
+1.01
 </td>
 <td style="text-align:right;">
 2,527,743
 </td>
 <td style="text-align:right;">
--62.6
+2,527,743
+</td>
+<td style="text-align:right;">
+-62.62
 </td>
 </tr>
 <tr>
@@ -2600,19 +2600,19 @@ SPL
 4,814
 </td>
 <td style="text-align:right;">
-8.5
+8.55
 </td>
 <td style="text-align:right;">
-4.3
-</td>
-<td style="text-align:right;">
-112,134
+4.29
 </td>
 <td style="text-align:right;">
 112,134
 </td>
 <td style="text-align:right;">
--49.8
+112,134
+</td>
+<td style="text-align:right;">
+-49.76
 </td>
 </tr>
 <tr>
@@ -2632,19 +2632,19 @@ Non SPL
 99,301
 </td>
 <td style="text-align:right;">
-7.3
+7.31
 </td>
 <td style="text-align:right;">
-3.9
-</td>
-<td style="text-align:right;">
-2,527,743
+3.93
 </td>
 <td style="text-align:right;">
 2,527,743
 </td>
 <td style="text-align:right;">
--46.2
+2,527,743
+</td>
+<td style="text-align:right;">
+-46.24
 </td>
 </tr>
 <tr>
@@ -2664,19 +2664,19 @@ SPL
 26,363
 </td>
 <td style="text-align:right;">
-50.5
+50.50
 </td>
 <td style="text-align:right;">
-23.5
-</td>
-<td style="text-align:right;">
-112,134
+23.51
 </td>
 <td style="text-align:right;">
 112,134
 </td>
 <td style="text-align:right;">
--53.4
+112,134
+</td>
+<td style="text-align:right;">
+-53.45
 </td>
 </tr>
 </tbody>
