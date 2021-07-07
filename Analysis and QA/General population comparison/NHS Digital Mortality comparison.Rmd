@@ -1,5 +1,5 @@
 ---
-title: "Mortality statistics for CEV people compared to the general population"
+title: "Mortality and COVID-19 testing statistics for CEV people compared to the general population"
 author: "Sebastien Peytrignet"
 date: "11/6/2021"
 output:
@@ -38,7 +38,9 @@ onedrivedir <- "C:/Users/SebastienP/OneDrive - The Health Foundation/Output 3/Ch
 numbers_only <- function(x) !grepl("\\D", x)
 ```
 
-## Reading in data and data cleaning
+## Mortality
+
+### Reading in data and data cleaning
 
 ```{r setup.B, echo=TRUE, message=FALSE}
 ####################################################################
@@ -64,7 +66,7 @@ nhsdigital.mortality %>%
   kable_styling(., full_width = F)
 ```
 
-## Comparison of rates during first wave
+### Comparison of rates during first wave
 
 ```{r ratecomp, echo=TRUE}
 nhsdigital.mortality %>%
@@ -76,7 +78,7 @@ nhsdigital.mortality %>%
   kable_styling(., full_width = F)
 ```
 
-## Peak mortality in both groups
+### Peak mortality in both groups
 
 ```{r peaks, echo=TRUE}
 nhsdigital.mortality %>%
@@ -93,7 +95,7 @@ nhsdigital.mortality %>%
   kable_styling(., full_width = F)
 ```
 
-## Number dead between March and August 2020
+### Number dead between March and August 2020
 
 ```{r totaldead, echo=TRUE}
 nhsdigital.mortality %>%
@@ -104,7 +106,7 @@ nhsdigital.mortality %>%
   kable_styling(., full_width = F)
 ```
 
-## Change in mortality rate between 23/03/2020 and 02/04/2020
+### Change in mortality rate between 23/03/2020 and 02/04/2020
 
 ```{r change, echo=TRUE}
 nhsdigital.mortality %>%
@@ -117,6 +119,47 @@ nhsdigital.mortality %>%
   ) %>%
   mutate(.,pct_increase_SPL=(`Rate.SPL.2020-04-02`-`Rate.SPL.2020-03-23`)/`Rate.SPL.2020-03-23`*100,
          pct_increase_gen_pop=(`Rate.General population.2020-04-02`-`Rate.General population.2020-03-23`)/`Rate.General population.2020-03-23`*100) %>%
+  kable(.,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+```
+
+## COVID-19 testing
+
+### Reading in data and data cleaning
+
+```{r setup.test, echo=TRUE, message=FALSE}
+nhsdigital.testing <- fread(paste0(rawdatadir,"Tracking Healthcare Activity and Outcomes for Shielded Patients, England, Open Data.csv"),
+                              header=TRUE, sep=",", check.names=T) %>%
+  filter(.,Activity_type=="Pillar 1 testing",Breakdown=="COVID-19",Rate!="NULL") %>%
+  mutate(.,Rate=as.numeric(Rate)) %>%
+  select(.,Population_group,Breakdown,Date,Rate) %>%
+  pivot_wider(
+    names_from = Population_group,
+    names_sep = ".",
+    values_from = c(Rate)
+  ) %>%
+  mutate(.,Date=lubridate::dmy(Date)) %>%
+  filter(.,Date<="2020-07-31")
+
+nhsdigital.testing %>%
+  head(.,n=10) %>%
+  kable(.,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+```
+
+### Peak mortality in both groups
+
+```{r peaks.test, echo=TRUE}
+nhsdigital.mortality %>%
+  filter(.,Date<="2020-07-31") %>%
+  slice_max(Rate.SPL,n=1) %>%
+  kable(.,format.args = list(big.mark = ",")) %>%
+  kable_styling(., full_width = F)
+
+nhsdigital.mortality %>%
+  filter(.,Date<="2020-07-31") %>%
+  slice_max(`Rate.General population`,n=1) %>%
+  slice_min(.,Date) %>%
   kable(.,format.args = list(big.mark = ",")) %>%
   kable_styling(., full_width = F)
 ```
