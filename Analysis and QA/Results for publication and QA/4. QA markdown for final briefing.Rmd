@@ -22,6 +22,7 @@ rm(list = ls())
 #Directories
 rawdatadir <- "M:/Analytics/Networked Data Lab/Partner outputs/Output 3 HC usage/"
 gitdir <- "M:/Analytics/Sebastien/GitHub/NDL_Output3_Hospital_care_CEV/"
+briefonedrivedir <- "C:/Users/SebastienP/OneDrive - The Health Foundation/Briefing chart data/"
 ```
 
 ## Reading in data
@@ -357,6 +358,20 @@ tableS1.all.partners %>%
 
 ```
 
+### Data for chart
+
+```{r, save.chart.data.icd10, echo=TRUE, message=FALSE, warning=FALSE}
+adm.by.chap.chart.data <- tableS1.all.partners %>%
+  mutate(.,ICD.num=word(ICD10.chapter,1,sep = fixed(' - '))) %>%
+  select(.,partner,type,ICD10.chapter,ICD.num,number.events.2019.sdc,number.events.2020.sdc) %>%
+  filter(.,partner=="Average") %>%
+  filter(.,(type=="elective"&ICD.num==2)|(type=="elective"&ICD.num==14)|(type=="elective"&ICD.num==11)|
+           (type=="emergency"&ICD.num==10)|(type=="emergency"&ICD.num==18)|(type=="emergency"&ICD.num==9)) %>%
+  select(.,-c("ICD.num","partner")) %>%
+  arrange(.,type,-number.events.2019.sdc)
+fwrite(adm.by.chap.chart.data, file = paste0(briefonedrivedir,"adm.by.chap.chart.data.csv"), sep = ",")
+```
+
 ## General population comparison in North West London
 
 ```{r, nwl.genpop, echo=TRUE, message=FALSE, warning=FALSE,fig.width=10,fig.height=10}
@@ -373,4 +388,16 @@ tableS2.all.partners %>%
   arrange(.,breakdown.level,cohort) %>% 
 kable(.,digits=2,format.args = list(big.mark = ",")) %>%
   kable_styling(., full_width = F)
+```
+
+### Data for chart
+
+```{r, save.chart.data.nwl, echo=TRUE, message=FALSE, warning=FALSE}
+data.nwl.comparison.chart <- tableS2.all.partners %>%
+  filter(.,partner=="NW London") %>%
+  select(.,breakdown.level,cohort,cases.per.100,year_month,year_month_day) %>%
+  pivot_wider(names_from = cohort,
+              names_sep = ".",
+              values_from = c(cases.per.100))
+fwrite(data.nwl.comparison.chart, file = paste0(briefonedrivedir,"data.nwl.comparison.chart.csv"), sep = ",")
 ```

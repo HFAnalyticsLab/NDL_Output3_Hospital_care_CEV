@@ -652,7 +652,7 @@ summary {
 </ul></li>
 <li><a href="#covid-19-testing">COVID-19 testing</a><ul>
 <li><a href="#reading-in-data-and-data-cleaning-1">Reading in data and data cleaning</a></li>
-<li><a href="#peak-mortality-in-both-groups-1">Peak mortality in both groups</a></li>
+<li><a href="#peak-rate-in-both-groups">Peak rate in both groups</a></li>
 </ul></li>
 </ul>
 </div>
@@ -673,6 +673,7 @@ rm(list = ls())
 
 #Set directory where inputs are saved
 rawdatadir &lt;- &quot;M:/Analytics/Networked Data Lab/Shielding/Tracking Healthcare Activity and Outcomes/Sep 2020/&quot;
+briefonedrivedir &lt;- &quot;C:/Users/SebastienP/OneDrive - The Health Foundation/Briefing chart data/&quot;
 
 #Git directory
 gitdir &lt;- rstudioapi::getSourceEditorContext()$path %&gt;%
@@ -682,6 +683,7 @@ gitdir &lt;- rstudioapi::getSourceEditorContext()$path %&gt;%
 
 #One drive directory
 onedrivedir &lt;- &quot;C:/Users/SebastienP/OneDrive - The Health Foundation/Output 3/Charts/&quot;
+briefonedrivedir &lt;- &quot;C:/Users/SebastienP/OneDrive - The Health Foundation/Briefing chart data/&quot;
 
 #Auxiliary function
 numbers_only &lt;- function(x) !grepl(&quot;\\D&quot;, x)</code></pre>
@@ -1003,6 +1005,10 @@ All
 </tr>
 </tbody>
 </table>
+<pre class="r"><code># nhsdigital.mortality.chart.data &lt;- nhsdigital.mortality %&gt;%
+#   filter(.,Date&lt;=&quot;2020-07-31&quot;) %&gt;%
+#   select(.,Breakdown,Date,Rate.SPL,`Rate.General population`)
+# fwrite(nhsdigital.mortality.chart.data, file = paste0(briefonedrivedir,&quot;mortality_cev_genpop.csv&quot;), sep = &quot;,&quot;)</code></pre>
 </div>
 <div id="comparison-of-rates-during-first-wave" class="section level3">
 <h3>Comparison of rates during first wave</h3>
@@ -3662,9 +3668,13 @@ COVID-19
 </tr>
 </tbody>
 </table>
+<pre class="r"><code># nhsdigital.testing.chart.data &lt;- nhsdigital.testing %&gt;%
+#   filter(.,Date&lt;=&quot;2020-07-31&quot;) %&gt;%
+#   select(.,Breakdown,Date,SPL,`General population`)
+# fwrite(nhsdigital.testing.chart.data, file = paste0(briefonedrivedir,&quot;covid19testing_cev_genpop.csv&quot;), sep = &quot;,&quot;)</code></pre>
 </div>
-<div id="peak-mortality-in-both-groups-1" class="section level3">
-<h3>Peak mortality in both groups</h3>
+<div id="peak-rate-in-both-groups" class="section level3">
+<h3>Peak rate in both groups</h3>
 <pre class="r"><code>nhsdigital.mortality %&gt;%
   filter(.,Date&lt;=&quot;2020-07-31&quot;) %&gt;%
   slice_max(Rate.SPL,n=1) %&gt;%

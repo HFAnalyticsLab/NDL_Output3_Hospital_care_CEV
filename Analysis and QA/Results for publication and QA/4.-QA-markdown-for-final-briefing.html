@@ -660,8 +660,11 @@ summary {
 <li><a href="#changes-by-icd-10-chapter">Changes by ICD-10 chapter</a><ul>
 <li><a href="#elective-admissions">Elective admissions</a></li>
 <li><a href="#emergency-admissions">Emergency admissions</a></li>
+<li><a href="#data-for-chart">Data for chart</a></li>
 </ul></li>
-<li><a href="#general-population-comparison-in-north-west-london">General population comparison in North West London</a></li>
+<li><a href="#general-population-comparison-in-north-west-london">General population comparison in North West London</a><ul>
+<li><a href="#data-for-chart-1">Data for chart</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -2372,6 +2375,18 @@ Average
 </tbody>
 </table>
 </div>
+<div id="data-for-chart" class="section level3">
+<h3>Data for chart</h3>
+<pre class="r"><code>adm.by.chap.chart.data &lt;- tableS1.all.partners %&gt;%
+  mutate(.,ICD.num=word(ICD10.chapter,1,sep = fixed(&#39; - &#39;))) %&gt;%
+  select(.,partner,type,ICD10.chapter,ICD.num,number.events.2019.sdc,number.events.2020.sdc) %&gt;%
+  filter(.,partner==&quot;Average&quot;) %&gt;%
+  filter(.,(type==&quot;elective&quot;&amp;ICD.num==2)|(type==&quot;elective&quot;&amp;ICD.num==14)|(type==&quot;elective&quot;&amp;ICD.num==11)|
+           (type==&quot;emergency&quot;&amp;ICD.num==10)|(type==&quot;emergency&quot;&amp;ICD.num==18)|(type==&quot;emergency&quot;&amp;ICD.num==9)) %&gt;%
+  select(.,-c(&quot;ICD.num&quot;,&quot;partner&quot;)) %&gt;%
+  arrange(.,type,-number.events.2019.sdc)
+fwrite(adm.by.chap.chart.data, file = paste0(briefonedrivedir,&quot;adm.by.chap.chart.data.csv&quot;), sep = &quot;,&quot;)</code></pre>
+</div>
 </div>
 <div id="general-population-comparison-in-north-west-london" class="section level2">
 <h2>General population comparison in North West London</h2>
@@ -2709,6 +2724,16 @@ SPL
 </tr>
 </tbody>
 </table>
+<div id="data-for-chart-1" class="section level3">
+<h3>Data for chart</h3>
+<pre class="r"><code>data.nwl.comparison.chart &lt;- tableS2.all.partners %&gt;%
+  filter(.,partner==&quot;NW London&quot;) %&gt;%
+  select(.,breakdown.level,cohort,cases.per.100,year_month,year_month_day) %&gt;%
+  pivot_wider(names_from = cohort,
+              names_sep = &quot;.&quot;,
+              values_from = c(cases.per.100))
+fwrite(data.nwl.comparison.chart, file = paste0(briefonedrivedir,&quot;data.nwl.comparison.chart.csv&quot;), sep = &quot;,&quot;)</code></pre>
+</div>
 </div>
 
 
