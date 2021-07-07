@@ -2383,7 +2383,8 @@ Average
   pivot_wider(.,names_from = year_month,
               names_sep = &quot;.&quot;,
               values_from = c(number.events.sdc,cases.per.100,total.patients)) %&gt;%
-  mutate(.,pct_change_rate=(cases.per.100.apr20 - cases.per.100.feb20   )/cases.per.100.feb20*100) %&gt;%
+  mutate(.,pct_change_rate=(cases.per.100.apr20 - cases.per.100.feb20   )/cases.per.100.feb20*100,
+         abs_change_rate=(cases.per.100.apr20   - cases.per.100.feb20   )) %&gt;%
   arrange(.,breakdown.level,cohort) %&gt;% 
 kable(.,digits=2,format.args = list(big.mark = &quot;,&quot;)) %&gt;%
   kable_styling(., full_width = F)</code></pre>
@@ -2420,6 +2421,9 @@ total.patients.apr20
 <th style="text-align:right;">
 pct_change_rate
 </th>
+<th style="text-align:right;">
+abs_change_rate
+</th>
 </tr>
 </thead>
 <tbody>
@@ -2454,6 +2458,9 @@ Non SPL
 <td style="text-align:right;">
 -89.64
 </td>
+<td style="text-align:right;">
+-0.48
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -2485,6 +2492,9 @@ SPL
 </td>
 <td style="text-align:right;">
 -68.33
+</td>
+<td style="text-align:right;">
+-6.00
 </td>
 </tr>
 <tr>
@@ -2518,6 +2528,9 @@ Non SPL
 <td style="text-align:right;">
 -52.13
 </td>
+<td style="text-align:right;">
+-0.20
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -2549,6 +2562,9 @@ SPL
 </td>
 <td style="text-align:right;">
 -44.59
+</td>
+<td style="text-align:right;">
+-1.91
 </td>
 </tr>
 <tr>
@@ -2582,6 +2598,9 @@ Non SPL
 <td style="text-align:right;">
 -62.62
 </td>
+<td style="text-align:right;">
+-1.69
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -2613,6 +2632,9 @@ SPL
 </td>
 <td style="text-align:right;">
 -49.76
+</td>
+<td style="text-align:right;">
+-4.25
 </td>
 </tr>
 <tr>
@@ -2646,6 +2668,9 @@ Non SPL
 <td style="text-align:right;">
 -46.24
 </td>
+<td style="text-align:right;">
+-3.38
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -2677,6 +2702,9 @@ SPL
 </td>
 <td style="text-align:right;">
 -53.45
+</td>
+<td style="text-align:right;">
+-26.99
 </td>
 </tr>
 </tbody>

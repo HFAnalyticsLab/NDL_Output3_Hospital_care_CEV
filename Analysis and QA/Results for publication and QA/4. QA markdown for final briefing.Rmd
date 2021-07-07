@@ -368,7 +368,8 @@ tableS2.all.partners %>%
   pivot_wider(.,names_from = year_month,
               names_sep = ".",
               values_from = c(number.events.sdc,cases.per.100,total.patients)) %>%
-  mutate(.,pct_change_rate=(cases.per.100.apr20	- cases.per.100.feb20	)/cases.per.100.feb20*100) %>%
+  mutate(.,pct_change_rate=(cases.per.100.apr20	- cases.per.100.feb20	)/cases.per.100.feb20*100,
+         abs_change_rate=(cases.per.100.apr20	- cases.per.100.feb20	)) %>%
   arrange(.,breakdown.level,cohort) %>% 
 kable(.,digits=2,format.args = list(big.mark = ",")) %>%
   kable_styling(., full_width = F)
