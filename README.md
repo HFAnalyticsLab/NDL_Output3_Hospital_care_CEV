@@ -2,7 +2,7 @@
 
 # Networked Data Lab: Hospital use for the clinically extremely vulnerable population, the impact of the pandemic
 
-#### Project Status: In progess
+#### Project Status: Completed
 
 ## Project Description
 
